@@ -226,13 +226,9 @@ N = conf.nb_steps * int(round(conf.T_step/conf.dt_mpc))  # number of time steps 
 N_ctrl = int((N*conf.dt_mpc)/dt_ctrl)  # number of time steps for TSID
 foot_steps_RF = foot_steps[::2, :]  # assume first foot step corresponds to right foot
 x_RF, dx_RF, ddx_RF = compute_foot_traj(foot_steps_RF, N_ctrl, dt_ctrl, conf.T_step, conf.step_height, 'stance')
-print(f"RIGHT FOOT: {x_RF[0, -1]}")
 foot_steps_LF = foot_steps[1::2, :]
-print(foot_steps_RF)
-print(foot_steps_LF)
 x_LF, dx_LF, ddx_LF = compute_foot_traj(foot_steps_LF, N_ctrl, dt_ctrl, conf.T_step, conf.step_height, 'swing')
-print(f"LEFT FOOT: {x_LF[0, -1]}")
-exit(0)
+
 # SAVE COMPUTED TRAJECTORIES IN NPY FILE FOR TSID
 np.savez(conf.DATA_FILE_TSID, com=com, dcom=dcom, ddcom=ddcom, 
          x_RF=x_RF, dx_RF=dx_RF, ddx_RF=ddx_RF,
