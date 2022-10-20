@@ -12,10 +12,76 @@ import matplotlib.pyplot as plt
 import hw1_conf as conf
 
 #------- Implement the 3rd order interpolating function here below -------
-# def compute_3rd_order_poly_traj(x0, x1, T, dt):
-#     ...
-#     ...
-#     return x, dx, ddx
+def compute_3rd_order_poly_traj(x0, x1, T, dt):
+    """
+    Compute the third order polynomial trajectory.
+    x0 and x1, the initial and final positions, can be:
+    - two dimensions (for x and y axis)
+    - one dimension (for z axis)
+
+    @param x0: initial state position
+    @param x1: final state position
+    @param T: lipm time step
+    @param dt: time step of TSID
+    @return: the position, velocity and acceleration computed to move from x0 to x1
+    """
+    interpolation_time_step = int(T / dt)
+
+    dex = - (x1[0] - x0[0]) / (2 * interpolation_time_step**3)
+    cx = - 3 * interpolation_time_step * dex
+    bx = 3 * dex
+
+    if x0.shape[0] == 2: # we are dealing with position (x,y)
+        dy = - (x1[1] - x0[1]) / (2 * interpolation_time_step ** 3)
+        cy = - 3 * interpolation_time_step * dy
+        by = 3 * dy
+
+        x = np.zeros((2, interpolation_time_step))
+        dx = np.zeros((2, interpolation_time_step))
+        ddx = np.zeros((2, interpolation_time_step))
+
+        for i in range(interpolation_time_step):
+            position_x = x0[0] + bx * i + cx * i * i + dex * i * i * i
+            position_y = x0[1] + by * i + cy * i * i + dy * i * i * i
+            derivative_x = bx + 2 * cx * i + 3 * dex * i * i
+            derivative_y = by + 2 * cy * i + 3 * dy * i * i
+            acceleration_x = 2 * cx + 6 * dex * i
+            acceleration_y = 2 * cy + 6 * dy * i
+            x[0, i] = position_x
+            x[1, i] = position_y
+            dx[0, i] = derivative_x
+            dx[1, i] = derivative_y
+            ddx[0, i] = acceleration_x
+            ddx[1, i] = acceleration_y
+
+        x[0, interpolation_time_step-1] = x1[0]
+        dx[0, interpolation_time_step-1] = 0
+        ddx[0, interpolation_time_step-1] = 0
+        return x, dx, ddx
+
+    else: # we are dealing with z axis
+        x = np.zeros((1, interpolation_time_step))
+        dx = np.zeros((1, interpolation_time_step))
+        ddx = np.zeros((1, interpolation_time_step))
+
+        for i in range(interpolation_time_step):
+            if x0[0] == 0:
+                position_x = bx * i + cx * i * i + dex * i * i * i
+                derivative_x = bx + 2 * cx * i + 3 * dex * i * i
+                acceleration_x = 2 * cx + 6 * dex * i
+            else:
+                position_x = x0[0] + bx * i + cx * i * i + dex * i * i * i
+                derivative_x = + bx + 2 * cx * i + 3 * dex * i * i
+                acceleration_x = + 2 * cx + 6 * dex * i
+
+            x[0, i] = position_x
+            dx[0, i] = derivative_x
+            ddx[0, i] = acceleration_x
+
+        x[0, interpolation_time_step - 1] = x1[0]
+        dx[0, interpolation_time_step - 1] = 0
+        ddx[0, interpolation_time_step - 1] = 0
+        return x, dx, ddx
 
 
 def compute_foot_traj(foot_steps, N, dt, step_time, step_height, first_phase):
