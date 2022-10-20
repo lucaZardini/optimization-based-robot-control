@@ -11,7 +11,7 @@ from plot_utils import plot_xy
 import matplotlib.pyplot as plt
 import hw1_conf as conf
 
-#------- Implement the 3rd order interpolating function here below -------
+
 def compute_3rd_order_poly_traj(x0, x1, T, dt):
     """
     Compute the third order polynomial trajectory.
@@ -26,8 +26,7 @@ def compute_3rd_order_poly_traj(x0, x1, T, dt):
     @return: the position, velocity and acceleration computed to move from x0 to x1
     """
     interpolation_time_step = int(T / dt)
-
-    dex = - (x1[0] - x0[0]) / (2 * interpolation_time_step**3)
+    dex = - (x1[0] - x0[0]) / (interpolation_time_step**3)
     cx = - 3 * interpolation_time_step * dex
     bx = 3 * dex
 
@@ -54,9 +53,6 @@ def compute_3rd_order_poly_traj(x0, x1, T, dt):
             ddx[0, i] = acceleration_x
             ddx[1, i] = acceleration_y
 
-        x[0, interpolation_time_step-1] = x1[0]
-        dx[0, interpolation_time_step-1] = 0
-        ddx[0, interpolation_time_step-1] = 0
         return x, dx, ddx
 
     else: # we are dealing with z axis
@@ -78,9 +74,6 @@ def compute_3rd_order_poly_traj(x0, x1, T, dt):
             dx[0, i] = derivative_x
             ddx[0, i] = acceleration_x
 
-        x[0, interpolation_time_step - 1] = x1[0]
-        dx[0, interpolation_time_step - 1] = 0
-        ddx[0, interpolation_time_step - 1] = 0
         return x, dx, ddx
 
 
@@ -233,9 +226,13 @@ N = conf.nb_steps * int(round(conf.T_step/conf.dt_mpc))  # number of time steps 
 N_ctrl = int((N*conf.dt_mpc)/dt_ctrl)  # number of time steps for TSID
 foot_steps_RF = foot_steps[::2, :]  # assume first foot step corresponds to right foot
 x_RF, dx_RF, ddx_RF = compute_foot_traj(foot_steps_RF, N_ctrl, dt_ctrl, conf.T_step, conf.step_height, 'stance')
+print(f"RIGHT FOOT: {x_RF[0, -1]}")
 foot_steps_LF = foot_steps[1::2, :]
+print(foot_steps_RF)
+print(foot_steps_LF)
 x_LF, dx_LF, ddx_LF = compute_foot_traj(foot_steps_LF, N_ctrl, dt_ctrl, conf.T_step, conf.step_height, 'swing')
-        
+print(f"LEFT FOOT: {x_LF[0, -1]}")
+exit(0)
 # SAVE COMPUTED TRAJECTORIES IN NPY FILE FOR TSID
 np.savez(conf.DATA_FILE_TSID, com=com, dcom=dcom, ddcom=ddcom, 
          x_RF=x_RF, dx_RF=dx_RF, ddx_RF=ddx_RF,
