@@ -41,26 +41,31 @@ def compute_foot_traj(foot_steps, N, dt, step_time, step_height, first_phase):
         x[0, :N_step] = foot_steps[0, 0]
         x[1, :N_step] = foot_steps[0, 1]
         
-    for s in range(foot_steps.shape[0]):  # theoretically, 0 or 1
+    for s in range(foot_steps.shape[0]):  # number of time steps
         i = offset+s*2*N_step
-        x[0, i:i+N_step] = foot_steps[s, 0]  # first row of the position, from i to i+N_steps insert the value of the foot step in the first value
-        x[1, i:i+N_step] = foot_steps[s, 1]  # first row of the position, from i to i+N_steps insert the value of the foot step in the secpmd value
-        if s < foot_steps.shape[0]-1:
-            next_step = foot_steps[s+1, :]
-        elif first_phase == 'swing':
+        x[0, i:i+N_step] = foot_steps[s, 0]  # position x of foot at time step s
+        x[1, i:i+N_step] = foot_steps[s, 1]  # position y of foot at time step s
+        if s < foot_steps.shape[0]-1:  # if s time step is not the last one
+            next_step = foot_steps[s+1, :]  # assign the next step of lipm
+        elif first_phase == 'swing':  # if left foot
             break
         else:
+            # if s time step is the last step, the next step is the same
+            # the height is set to 0, meaning that the robot does not have to move
             next_step = foot_steps[s, :]
             step_height = 0.0
 
+        # x and y assignment
         x[:2, i+N_step: i+2*N_step], \
         dx[:2, i+N_step: i+2*N_step], \
         ddx[:2, i+N_step: i+2*N_step] = compute_3rd_order_poly_traj(foot_steps[s, :], next_step, step_time, dt)
-            
+
+        # height assignment
         x[2, i+N_step: i+int(1.5*N_step)], \
         dx[2, i+N_step: i+int(1.5*N_step)], \
         ddx[2, i+N_step: i+int(1.5*N_step)] = compute_3rd_order_poly_traj(np.array([0.]), np.array([step_height]), 0.5*step_time, dt)
-        
+
+        # height assignment
         x[2, i+int(1.5*N_step):i+2*N_step], \
         dx[2, i+int(1.5*N_step):i+2*N_step], \
         ddx[2, i+int(1.5*N_step):i+2*N_step] = compute_3rd_order_poly_traj(np.array([step_height]), np.array([0.0]), 0.5*step_time, dt)
