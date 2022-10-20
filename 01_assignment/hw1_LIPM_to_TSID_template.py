@@ -57,9 +57,13 @@ def compute_foot_traj(foot_steps, N, dt, step_time, step_height, first_phase):
         dx[:2, i+N_step: i+2*N_step], \
         ddx[:2, i+N_step: i+2*N_step] = compute_3rd_order_poly_traj(foot_steps[s, :], next_step, step_time, dt)
             
-        x[2, i+N_step: i+int(1.5*N_step)], dx[2, i+N_step: i+int(1.5*N_step)], ddx[2, i+N_step: i+int(1.5*N_step)] = compute_3rd_order_poly_traj(np.array([0.]), np.array([step_height]), 0.5*step_time, dt)
+        x[2, i+N_step: i+int(1.5*N_step)], \
+        dx[2, i+N_step: i+int(1.5*N_step)], \
+        ddx[2, i+N_step: i+int(1.5*N_step)] = compute_3rd_order_poly_traj(np.array([0.]), np.array([step_height]), 0.5*step_time, dt)
         
-        x[2, i+int(1.5*N_step):i+2*N_step], dx[2, i+int(1.5*N_step):i+2*N_step], ddx[2, i+int(1.5*N_step):i+2*N_step] = compute_3rd_order_poly_traj(np.array([step_height]), np.array([0.0]), 0.5*step_time, dt)
+        x[2, i+int(1.5*N_step):i+2*N_step], \
+        dx[2, i+int(1.5*N_step):i+2*N_step], \
+        ddx[2, i+int(1.5*N_step):i+2*N_step] = compute_3rd_order_poly_traj(np.array([step_height]), np.array([0.0]), 0.5*step_time, dt)
             
     return x, dx, ddx
 
