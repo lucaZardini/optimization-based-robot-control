@@ -38,10 +38,10 @@ def compute_foot_traj(foot_steps, N, dt, step_time, step_height, first_phase):
     ddx = np.zeros((3, N+1))  # acceleration
     N_step = int(step_time/dt)  # number of steps of the TSID. How many time steps tsid are contained in one robot step.
     offset = 0
-    if first_phase == 'swing':
+    if first_phase == 'swing':  # left leg
         offset = N_step
-        x[0, :N_step] = foot_steps[0, 0]
-        x[1, :N_step] = foot_steps[0, 1]
+        x[0, :N_step] = foot_steps[0, 0]  # initialization of the x leg foot
+        x[1, :N_step] = foot_steps[0, 1]  # initialization of the y leg foot
         
     for s in range(foot_steps.shape[0]):  # number of time steps
         i = offset+s*2*N_step
