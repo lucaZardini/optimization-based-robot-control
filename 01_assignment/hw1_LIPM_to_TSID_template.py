@@ -21,6 +21,8 @@ import hw1_conf as conf
 def compute_foot_traj(foot_steps, N, dt, step_time, step_height, first_phase):
     """
     Compute the foot trajectory.
+    The foot trajectory is computed considering only the right foot for the interpolation. Indeed, the right foot
+    concides with the stance mode, the left foot concides with the swing mode.
 
     @param foot_steps: the steps of the foot
     @param N: number of time steps of TSID
