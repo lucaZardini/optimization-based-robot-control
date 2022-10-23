@@ -66,7 +66,7 @@ def compute_3rd_order_poly_traj(x0, x1, T, dt):
         # Return the trajectory for x and y coordinates
         return x, dx, ddx
     
-    else: # check if x is a matrix containing only z 
+    else: # check if x is a vector containing only z 
         
         # Fill x, dx and ddx vectors with only zeroes
         z = np.zeros((1, N_step))
