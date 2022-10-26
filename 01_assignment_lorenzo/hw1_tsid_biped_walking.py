@@ -6,7 +6,6 @@ Created on Mon Oct 18 10:31:22 2022
 """
 
 import time
-import numpy as np
 import hw1_conf as conf
 from plot_utils import create_empty_figure
 from tsid_biped import TsidBiped
@@ -184,8 +183,38 @@ for i in range(-N_pre, N+N_post):
 # PLOT STUFF
 time = np.arange(0.0, (N+N_post)*conf.dt, conf.dt)
 
+
+def store_meaningful_info(com_pos: np.ndarray, com_acc: np.ndarray) -> None:
+    """
+    Store some parameters in a file named with weight and gain of the squat task,
+
+    :param com_pos: the position computed
+    :param com_acc: the acceleration computed
+    """
+
+    z_pos = list(com_pos[2, :])
+    z_acc = list(com_acc[2, :])
+
+    filename = "Simulation_Results/w_squat"+str(conf.w_squat)+"kp_squat"+str(conf.kp_squat)+".txt"
+
+    with open(filename, 'w') as f:
+        f.write(f"Initial position: {z_pos[0]}\n")
+        f.write(f"Minimum value: {min(z_pos)}\n")
+        f.write(f"Time of minimum value {z_pos.index(min(z_pos))}\n")
+        f.write(f"Amount of shift {z_pos[1500] - min(z_pos)}\n")
+        stable = z_pos.index(next(x for x in z_pos[z_pos.index(min(z_pos)):] if z_pos[1500] - 0.002 < x < z_pos[1500] + 0.002))
+        f.write(f"Time to return to stability {stable - 1500}\n")
+
+        f.write(f"The maximum acc is {max(z_acc)}\n")
+        f.write(f"The acceleration happens at {z_acc.index(max(z_acc))}\n")
+
+
 if PLOT_COM:
     (f, ax) = create_empty_figure(3,1)
+
+    if conf.SQUAT and conf.PUSH:
+        store_meaningful_info(com_pos, com_acc)
+
     for i in range(3):
         ax[i].plot(time, com_pos[i,:], label='CoM '+str(i))
         ax[i].plot(time[:N], com_pos_ref[i,:], 'r:', label='CoM Ref '+str(i))
