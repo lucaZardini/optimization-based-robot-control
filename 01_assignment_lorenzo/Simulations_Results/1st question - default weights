@@ -20,7 +20,7 @@
  
   - x_com = 100
   - w_posture = 3e-4
-  - w_foot = 1e-1
+  - w_foot = 1
   
   
   
