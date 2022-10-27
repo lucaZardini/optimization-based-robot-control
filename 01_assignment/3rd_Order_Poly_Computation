@@ -1,7 +1,7 @@
 3rd ORDER INTERPOLATING EQUATION: x(t) = a + b*t + c*t^2 + d*t^3
-        
+
             THERE ARE A TOTAL OF 4 EQUATIONS IN 4 UKNOWNS:
-                
+
               1) x(t=0) = x0 = a                           initial position
               2) x(t=T) = x1 = a + b*T + c*T^2 + d*T^3     final position
               3) x'(t=0) = 0 = b                           null initial velocity
@@ -13,7 +13,3 @@ RESULTS:
    b = 0
    c = 3*(x1-x0)/(T^2)
    d = 2*(x0-x1)/(T^3)
-   
-   
-   
-   
