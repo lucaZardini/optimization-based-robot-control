@@ -199,18 +199,26 @@ def store_meaningful_info(com_pos: np.ndarray, com_acc: np.ndarray) -> None:
     z_acc = list(com_acc[2, :])
 
     filename = "Simulations_Results/w_squat" + str(conf.w_squat) + "kp_squat" + str(conf.kp_squat) + ".txt"
+    try:
+        with open(filename, 'w') as f:
+            f.write(f"Initial position: {z_pos[0]}\n")
+            f.write(f"Minimum value: {min(z_pos)}\n")
+            f.write(f"Time of minimum value {z_pos.index(min(z_pos))}\n")
+            f.write(f"Amount of shift {z_pos[1500] - min(z_pos)}\n")
+            stable = z_pos.index(next(x for x in z_pos[z_pos.index(min(z_pos)):] if z_pos[1500] - 0.002 < x < z_pos[1500] + 0.002))
+            f.write(f"Time to return to stability {stable - 1500}\n")
 
-    with open(filename, 'w') as f:
-        f.write(f"Initial position: {z_pos[0]}\n")
-        f.write(f"Minimum value: {min(z_pos)}\n")
-        f.write(f"Time of minimum value {z_pos.index(min(z_pos))}\n")
-        f.write(f"Amount of shift {z_pos[1500] - min(z_pos)}\n")
-        stable = z_pos.index(
-            next(x for x in z_pos[z_pos.index(min(z_pos)):] if z_pos[1500] - 0.002 < x < z_pos[1500] + 0.002))
-        f.write(f"Time to return to stability {stable - 1500}\n")
+            f.write(f"The maximum acc is {max(z_acc)}\n")
+            f.write(f"The acceleration happens at {z_acc.index(max(z_acc))}\n")
+    except Exception:
 
-        f.write(f"The maximum acc is {max(z_acc)}\n")
-        f.write(f"The acceleration happens at {z_acc.index(max(z_acc))}\n")
+        print(f"Initial position: {z_pos[0]}\n")
+        print(f"Minimum value: {min(z_pos)}\n")
+        print(f"Time of minimum value {z_pos.index(min(z_pos))}\n")
+        print(f"Amount of shift {z_pos[1500] - min(z_pos)}\n")
+        stable = z_pos.index(next(x for x in z_pos[z_pos.index(min(z_pos)):] if z_pos[1500] - 0.002 < x < z_pos[1500] + 0.002))
+        print(f"Time to return to stability {stable - 1500}\n")
+        print(f"The maximum acc is {max(z_acc)}\n")
 
 
 if PLOT_COM:
