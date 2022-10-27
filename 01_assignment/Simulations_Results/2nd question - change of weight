@@ -1,0 +1,16 @@
+
+ ------------------------------------------- SQUAT = 1 --------------------------------------------
+ 
+ PESI PREDEFINITI:
+  
+  - w_squat = 10                    # weight of squat task
+  - kp_squat = 10                   # proportional gain of squat task
+  
+  TEST SUL CAMBIAMENTO DEI VALORI DEI PESI:
+  
+  - increase w_squat = 10000 --> CoM quite coincident to the desired heigth
+  - increase kp_squat = 10000 --> Robot does not stay in equlibrium
+                      = 1000 --> CoM close to desired heigth, robot doesn't fall, needs some 				initial settling
+  
+  
+  

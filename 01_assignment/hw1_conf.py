@@ -17,9 +17,9 @@ DATA_FILE_LIPM = 'talos_walking_traj_lipm.npz'
 DATA_FILE_TSID = 'talos_walking_traj_tsid.npz'
 
 PUSH = 0                                               # Flag to activate CoM push @ half walk
-push_robot_com_vel = [0.1,0.,0.]                       # CoM velocity push
+push_robot_com_vel = [0.1,0.,0]                       # CoM velocity push
 SQUAT = 0                                              # Flag to activate squat task
-squat_height = 0.65                                    # desired CoM height while squatting 
+squat_height = 0.65                                    # desired CoM height while squatting
 
 # robot parameters
 # ----------------------------------------------
@@ -53,7 +53,7 @@ g           = 9.81      # norm of the gravity vector
 foot_step_0   = np.array([0.0, -0.085])   # initial foot step position in x-y
 dt_mpc                = 0.1               # sampling time interval
 T_step                = 1                 # time needed for every step
-step_length           = 0.2               # fixed step length 
+step_length           = 0.2               # fixed step length
 step_height           = 0.05              # fixed step height
 nb_steps              = 6                 # number of desired walking steps
 
@@ -63,14 +63,14 @@ dt = 0.002                      # controller time step
 T_pre  = 1.5                    # simulation time before starting to walk
 T_post = 0                      # simulation time after walking
 
-w_com = 5e-1                    # weight of center of mass task (ref trajectory)
+w_com = 100                # weight of center of mass task (ref trajectory)
 if SQUAT:
-    w_squat = 10                # weight of squat task
+    w_squat = 10              # weight of squat task
 else:
     w_squat = 0                 # weight of squat task
-w_foot = 1e-1                   # weight of the foot motion task
+w_foot = 1                      # weight of the foot motion task
 w_contact = 1e2                 # weight of the foot in contact
-w_posture = 2e-2                # weight of joint posture task
+w_posture = 3e-4                # weight of joint posture task
 w_forceRef = 1e-5               # weight of force regularization task
 w_torque_bounds = 0.0           # weight of the torque bounds
 w_joint_bounds = 0.0            # weight of the joint bounds
