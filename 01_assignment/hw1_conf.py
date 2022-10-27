@@ -68,7 +68,7 @@ if SQUAT:
     w_squat = 10              # weight of squat task
 else:
     w_squat = 0                 # weight of squat task
-w_foot = 1e-1                  # weight of the foot motion task
+w_foot = 1                      # weight of the foot motion task
 w_contact = 1e2                 # weight of the foot in contact
 w_posture = 3e-4                # weight of joint posture task
 w_forceRef = 1e-5               # weight of force regularization task
