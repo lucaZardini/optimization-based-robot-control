@@ -75,12 +75,12 @@ class TsidBiped:
         comTask.setKp(conf.kp_com * np.ones(3))
         comTask.setKd(2.0 * np.sqrt(conf.kp_com) * np.ones(3))
         formulation.addMotionTask(comTask, conf.w_com, 1, 0.0)
-        
+
         squatTask = tsid.TaskComEquality("task-squat", robot)
         squatTask.setKp(conf.kp_squat * np.ones(3))
         squatTask.setKd(2.0 * np.sqrt(conf.kp_squat) * np.ones(3))
         formulation.addMotionTask(squatTask, conf.w_squat, 1, 0.0)
-       
+
         amTask = tsid.TaskAMEquality("task-am", robot)
         amTask.setKp(conf.kp_am * np.array([1., 1., 0.]))
         amTask.setKd(2.0 * np.sqrt(conf.kp_am * np.array([1., 1., 0.])))
@@ -106,7 +106,7 @@ class TsidBiped:
         self.trajRF = tsid.TrajectorySE3Constant("traj-right-foot", H_rf_ref)
         formulation.addMotionTask(self.rightFootTask, self.conf.w_foot, 1, 0.0)
 
-        self.tau_max = conf.tau_max_scaling*robot.model().effortLimit[-robot.na:]
+        self.tau_max = conf.tau_max_scaling * robot.model().effortLimit[-robot.na:]
         self.tau_min = -self.tau_max
         actuationBoundsTask = tsid.TaskActuationBounds("task-actuation-bounds", robot)
         actuationBoundsTask.setBounds(self.tau_min, self.tau_max)
@@ -180,7 +180,7 @@ class TsidBiped:
                                   self.robot_display.visual_model)
                 self.viz.initViewer(loadModel=True)
                 self.viz.display(q)
-                
+
     def display(self, q):
         if hasattr(self, 'viz'):
             self.viz.display(q)
