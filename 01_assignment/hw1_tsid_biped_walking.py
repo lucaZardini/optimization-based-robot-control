@@ -207,7 +207,7 @@ def store_meaningful_info(com_pos: np.ndarray, com_acc: np.ndarray) -> None:
         f.write(f"Amount of shift {z_pos[1500] - min(z_pos)}\n")
         stable = z_pos.index(
             next(x for x in z_pos[z_pos.index(min(z_pos)):] if z_pos[1500] - 0.002 < x < z_pos[1500] + 0.002))
-        f.write(f"Time to return to stability {stable - 1500}\n")
+        f.write(f"Time to return to stability {(stable - 1500)/500}\n")
 
         f.write(f"The maximum acc is {max(z_acc)}\n")
         f.write(f"The acceleration happens at {z_acc.index(max(z_acc))}\n")
