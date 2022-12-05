@@ -78,8 +78,7 @@ class DDPSolverLinearDyn(DDPSolver):
         if self.CONTROL_BOUNDS:
             barr = -self.beta * np.log(self.max_torque + self.eps + u) - self.beta * np.log(
                 self.max_torque + self.eps - u)
-            c_u += - self.w_bounds * self.beta * barr * (
-                        1 / (self.max_torque + self.eps + u) - 1 / (self.max_torque + self.eps - u))
+            c_u += - self.w_bounds * self.beta * barr * (1 / (self.max_torque + self.eps + u) - 1 / (self.max_torque + self.eps - u))
         return c_u
 
     def cost_running_xx(self, i, x, u):
@@ -295,10 +294,10 @@ if __name__ == '__main__':
 
     n = nq + nv  # state size
     m = robot.na  # control size
-    U_bar = np.zeros((N, m));  # initial guess for control inputs
+    U_bar = np.zeros((N, m))  # initial guess for control inputs
     x0 = np.concatenate((conf.q0, np.zeros(robot.nv)))  # initial state
     x_tasks = np.concatenate((conf.qT, np.zeros(robot.nv)))  # goal state
-    N_task = N;  # time step to reach goal state
+    N_task = N  # time step to reach goal state
 
     tau_g = robot.nle(conf.q0, np.zeros(robot.nv))
     for i in range(N):
@@ -369,6 +368,7 @@ if __name__ == '__main__':
         plt.gca().set_xlabel('Time [s]')
         plt.gca().set_ylabel('[Nm]')
         leg = plt.legend(["1st joint torque", "1st joint ref. torque"], loc='upper right')
+        plt.savefig("torque.png")
 
     if conf.PLOT_JOINT_POS:
         plt.figure()
@@ -380,6 +380,7 @@ if __name__ == '__main__':
         plt.gca().set_ylabel('[rad]')
         plt.legend(["1st joint position", "1st joint ref. position", "2nd joint position", "2nd joint ref position"],
                    loc='upper right')
+        plt.savefig("position.png")
 
     if conf.PLOT_JOINT_VEL:
         plt.figure()
@@ -391,5 +392,6 @@ if __name__ == '__main__':
         plt.gca().set_ylabel('[rad/s]')
         plt.legend(["1st joint velocity", "1st joint ref. velocity", "2nd joint velocity", "2nd joint ref velocity"],
                    loc='upper right')
+        plt.savefig("velocity.png")
 
     plt.show()

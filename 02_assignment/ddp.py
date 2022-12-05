@@ -186,19 +186,19 @@ class DDPSolver:
 
             for jj in range(self.max_line_search_iter):
                 (X, U) = self.simulate_system(x0, U_bar + alpha * self.kk, self.KK, X_bar)
-                new_cost = self.cost(X, U);
+                new_cost = self.cost(X, U)
                 exp_impr = alpha * self.d1 + 0.5 * (alpha ** 2) * self.d2
                 # print("Expected improvement", exp_impr, "Real improvement", new_cost-cst)
                 relative_impr = (new_cost - cst) / exp_impr
 
-                if (relative_impr > self.min_cost_impr):
+                if relative_impr > self.min_cost_impr:
                     print("Cost improved from %.3f to %.3f. Exp. impr %.3f. Rel. impr. %.1f%%" % (
                     cst, new_cost, exp_impr, 1e2 * relative_impr))
                     line_search_succeeded = True
                 else:
                     print("No cost improvement")
 
-                if (line_search_succeeded):
+                if line_search_succeeded:
                     U_bar += alpha * self.kk
                     cst = new_cost
                     break
@@ -206,21 +206,21 @@ class DDPSolver:
                     alpha = self.alpha_factor * alpha
 
             if self.mu_factor != 0:
-                if (not line_search_succeeded):
+                if not line_search_succeeded:
                     mu = mu * self.mu_factor
                     print("No cost improvement, increasing mu to", mu)
-                    if (mu > self.mu_max):
+                    if mu > self.mu_max:
                         print("Max regularization reached. Algorithm failed to converge.")
                         converged = True
                 else:
                     print("Line search succeeded with alpha", alpha)
-                    if (alpha >= self.min_alpha_to_increase_mu):
+                    if alpha >= self.min_alpha_to_increase_mu:
                         mu = mu / self.mu_factor
                         print("Decreasing mu to ", mu)
                     else:
                         mu = mu * self.mu_factor
                         print("Alpha is small => increasing mu to", mu)
-                        if (mu > self.mu_max):
+                        if mu > self.mu_max:
                             print("Max regularization reached. Algorithm failed to converge.")
                             converged = True
                     # self.callback(X_bar, U_bar)
@@ -236,8 +236,8 @@ class DDPSolver:
                 break
 
         # compute nominal state trajectory X_bar
-        (X_bar, U_bar) = self.simulate_system(x0, U_bar, self.KK, X_bar)
-        return (X_bar, U_bar, self.KK)
+        X_bar, U_bar = self.simulate_system(x0, U_bar, self.KK, X_bar)
+        return X_bar, U_bar, self.KK
 
     def callback(self, X, U):
         ''' callback function called at every iteration '''
@@ -255,17 +255,17 @@ class DDPSolver:
 
     ''' Discrete-time system dynamics '''
 
-    def f(x, u):
+    def f(self, x, u):
         return None
 
     ''' Partial derivatives of discrete-time system dynamics w.r.t. x '''
 
-    def f_x(x, u):
+    def f_x(self, x, u):
         return None
 
     ''' Partial derivatives of discrete-time system dynamics w.r.t. u '''
 
-    def f_u(x, u):
+    def f_u(self, x, u):
         return None
 
     def cost(self, X, U):

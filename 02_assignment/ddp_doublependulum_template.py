@@ -46,8 +46,10 @@ class DDPSolverLinearDyn(DDPSolver):
         cost = 0.5 * np.dot(x, np.dot(self.H_xx[i, :, :], x)) \
                + np.dot(self.h_x[i, :].T, x) + self.h_s[i] \
                + 0.5 * self.lmbda * np.dot(u.T, u) \
-            # + ... add here the running cost term for taking into account the underactuation
+               + 0.5 * self.underact * np.dot(np.dot(np.array([[0, 0], [0, 1]]), u).T,
+                                              np.dot(np.array([[0, 0], [0, 1]]), u))
         if self.CONTROL_BOUNDS:
+            pass  # TODO
         # ... implement here the running cost term for taking into the control limits
         return cost
 
@@ -70,8 +72,11 @@ class DDPSolverLinearDyn(DDPSolver):
     def cost_running_u(self, i, x, u):
         ''' Gradient of the running cost w.r.t. u '''
         c_u = self.lmbda * u \
+              + self.underact * np.array([0, u[1]])
+        # print(self.underact * u)
             # + ... add here the derivative w.r.t u of the running cost term for taking into account the underactuation
         if self.CONTROL_BOUNDS:
+            pass  # TODO
         # ... implement here the derivative w.r.t u of the running cost term for taking into the control limits
         return c_u
 
@@ -86,8 +91,10 @@ class DDPSolverLinearDyn(DDPSolver):
     def cost_running_uu(self, i, x, u):
         ''' Hessian of the running cost w.r.t. u '''
         c_uu = self.lmbda * np.eye(self.nu) \
+               + self.underact * np.diagflat([0, 1])
             # + ... add here the second derivative w.r.t u of the running cost term for taking into account the underactuation
         if self.CONTROL_BOUNDS:
+            pass  # TODO
         # ... implement here the second derivative w.r.t u of the running cost term for taking into the control limits
         return c_uu
 
@@ -281,10 +288,10 @@ if __name__ == '__main__':
 
     n = nq + nv  # state size
     m = robot.na  # control size
-    U_bar = np.zeros((N, m));  # initial guess for control inputs
+    U_bar = np.zeros((N, m))  # initial guess for control inputs
     x0 = np.concatenate((conf.q0, np.zeros(robot.nv)))  # initial state
     x_tasks = np.concatenate((conf.qT, np.zeros(robot.nv)))  # goal state
-    N_task = N;  # time step to reach goal state
+    N_task = N  # time step to reach goal state
 
     tau_g = robot.nle(conf.q0, np.zeros(robot.nv))
     for i in range(N):
@@ -355,6 +362,7 @@ if __name__ == '__main__':
         plt.gca().set_xlabel('Time [s]')
         plt.gca().set_ylabel('[Nm]')
         leg = plt.legend(["1st joint torque", "1st joint ref. torque"], loc='upper right')
+        # plt.savefig("torque.png")
 
     if conf.PLOT_JOINT_POS:
         plt.figure()
@@ -366,6 +374,7 @@ if __name__ == '__main__':
         plt.gca().set_ylabel('[rad]')
         plt.legend(["1st joint position", "1st joint ref. position", "2nd joint position", "2nd joint ref position"],
                    loc='upper right')
+        # plt.savefig("position.png")
 
     if conf.PLOT_JOINT_VEL:
         plt.figure()
@@ -377,5 +386,6 @@ if __name__ == '__main__':
         plt.gca().set_ylabel('[rad/s]')
         plt.legend(["1st joint velocity", "1st joint ref. velocity", "2nd joint velocity", "2nd joint ref velocity"],
                    loc='upper right')
+        # plt.savefig("velocity.png")
 
     plt.show()
