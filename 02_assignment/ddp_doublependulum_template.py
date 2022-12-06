@@ -350,7 +350,12 @@ if __name__ == '__main__':
 
     if conf.SAVE_TRAJECTORY:
         if conf.SELECTION_MATRIX:
-            np.savetxt("selection_matrix_"+conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+            if conf.PUSH and ddp_params["mu_factor"] != 0:
+                np.savetxt("push_selection_matrix_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+            elif ddp_params["mu_factor"] == 0:
+                np.savetxt("mu_factor_selection_matrix_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+            else:
+                np.savetxt("selection_matrix_"+conf.TRAJECTORY_FILE, X_sim, delimiter=',')
         else:
             np.savetxt("penalty_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
         np.savetxt("time_vec.csv", time_vec, delimiter=',')
