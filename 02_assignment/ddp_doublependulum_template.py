@@ -71,10 +71,7 @@ class DDPSolverLinearDyn(DDPSolver):
 
     def cost_running_u(self, i, x, u):
         ''' Gradient of the running cost w.r.t. u '''
-        c_u = self.lmbda * u \
-              + self.underact * np.array([0, u[1]])
-        # print(self.underact * u)
-            # + ... add here the derivative w.r.t u of the running cost term for taking into account the underactuation
+        c_u = self.lmbda * u + self.underact * np.array([0, u[1]])
         if self.CONTROL_BOUNDS:
             pass  # TODO
         # ... implement here the derivative w.r.t u of the running cost term for taking into the control limits
@@ -90,9 +87,7 @@ class DDPSolverLinearDyn(DDPSolver):
 
     def cost_running_uu(self, i, x, u):
         ''' Hessian of the running cost w.r.t. u '''
-        c_uu = self.lmbda * np.eye(self.nu) \
-               + self.underact * np.diagflat([0, 1])
-            # + ... add here the second derivative w.r.t u of the running cost term for taking into account the underactuation
+        c_uu = self.lmbda * np.eye(self.nu) + self.underact * np.array([[0, 0], [0, 1]])
         if self.CONTROL_BOUNDS:
             pass  # TODO
         # ... implement here the second derivative w.r.t u of the running cost term for taking into the control limits
