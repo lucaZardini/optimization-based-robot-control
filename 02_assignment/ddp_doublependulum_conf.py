@@ -29,14 +29,17 @@ model_variation = 10.0
 PUSH = 0  # flag to activate four pushes on the second joint (instantaneous variation of the second joint velocity) at N/8, N/4, N/2 and 3*N/4 simulation steps
 push_vec = np.array([0, 3])  # instantaneous velocity increment of the second joint
 
-SELECTION_MATRIX = 1  # flag to use the selection matrix method
-ACTUATION_PENALTY = 0  # flag to use the actuation penalty method
+SELECTION_MATRIX = 0  # flag to use the selection matrix method
+ACTUATION_PENALTY = 1  # flag to use the actuation penalty method
 
 TORQUE_LIMITS = 0  # flag to bound controls
 
 PLOT_TORQUES = 1  # flag to plot controls
 PLOT_JOINT_POS = 1  # flag to plot joint angles
 PLOT_JOINT_VEL = 1  # flag to plot joint velocities
+
+SAVE_TRAJECTORY = True
+TRAJECTORY_FILE = "trajectory.csv"
 
 use_viewer = True
 simulate_real_time = 1  # flag specifying whether simulation should be real time or as fast as possible

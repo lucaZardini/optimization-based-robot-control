@@ -345,7 +345,15 @@ if __name__ == '__main__':
 
     print("Show real simulation")
     X_sim, U_sim = solver.start_simu(x0, X, U, KK, conf.dt_sim, conf.PUSH, conf.TORQUE_LIMITS)
+
     time_vec = np.linspace(0.0, conf.N * conf.dt, N + 1)
+
+    if conf.SAVE_TRAJECTORY:
+        # if conf.SELECTION_MATRIX:
+        #     np.savetxt("selection_matrix_"+conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+        # else:
+        #     np.savetxt("penalty_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+        np.savetxt("time_vec.csv", time_vec, delimiter=',')
 
     if conf.PLOT_TORQUES:
         plt.figure()
