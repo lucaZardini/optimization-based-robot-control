@@ -19,8 +19,10 @@ class TrajectoryAnalyzer:
 
 
 if __name__ == "__main__":
-    difference = TrajectoryAnalyzer.read_and_subtract("selection_matrix_trajectory.csv", "penalty_trajectory.csv")
+    difference = TrajectoryAnalyzer.read_and_subtract("selection_matrix_trajectory.csv", "mu_factor_selection_matrix_trajectory.csv")
     time_vec = TrajectoryAnalyzer.read("time_vec.csv", ",")
+    first_method = TrajectoryAnalyzer.read("selection_matrix_trajectory.csv", ",")
+    second_method = TrajectoryAnalyzer.read("mu_factor_selection_matrix_trajectory.csv", ",")
 
     plt.figure()
     plt.plot(time_vec, difference[:, 0], 'b')
@@ -36,6 +38,26 @@ if __name__ == "__main__":
     plt.gca().set_xlabel('Time [s]')
     plt.gca().set_ylabel('[rad/s]')
     plt.legend(["1st joint velocity difference", "2nd joint velocity difference"],
+               loc='upper right')
+
+    plt.figure()
+    plt.plot(time_vec, first_method[:, 0], 'b')
+    plt.plot(time_vec, first_method[:, 1], 'r')
+    plt.plot(time_vec, second_method[:, 0], 'b--')
+    plt.plot(time_vec, second_method[:, 1], 'r--')
+    plt.gca().set_xlabel('Time [s]')
+    plt.gca().set_ylabel('[rad]')
+    plt.legend(["1st joint position first", "2nd joint position first", "1st joint position second", "2nd joint position second"],
+               loc='upper right')
+
+    plt.figure()
+    plt.plot(time_vec, first_method[:, 2], 'b')
+    plt.plot(time_vec, first_method[:, 3], 'r')
+    plt.plot(time_vec, second_method[:, 2], 'b--')
+    plt.plot(time_vec, second_method[:, 3], 'r--')
+    plt.gca().set_xlabel('Time [s]')
+    plt.gca().set_ylabel('[rad/s]')
+    plt.legend(["1st joint velocity first", "2nd joint velocity first", "1st joint velocity second", "2nd joint velocity second"],
                loc='upper right')
 
     plt.show()

@@ -265,7 +265,7 @@ if __name__ == '__main__':
     mu = 10  # initial regularization
     ddp_params = {}
     ddp_params['alpha_factor'] = 0.5
-    ddp_params['mu_factor'] = 10.
+    ddp_params['mu_factor'] = 0
     ddp_params['mu_max'] = 1e0
     ddp_params['min_alpha_to_increase_mu'] = 0.1
     ddp_params['min_cost_impr'] = 1e-1
@@ -352,6 +352,8 @@ if __name__ == '__main__':
         if conf.SELECTION_MATRIX:
             if conf.PUSH and ddp_params["mu_factor"] != 0:
                 np.savetxt("push_selection_matrix_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+            elif conf.PUSH and ddp_params["mu_factor"] == 0:
+                np.savetxt("push_and_mu_factor_selection_matrix_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
             elif ddp_params["mu_factor"] == 0:
                 np.savetxt("mu_factor_selection_matrix_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
             else:
