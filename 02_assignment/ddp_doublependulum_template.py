@@ -352,14 +352,19 @@ if __name__ == '__main__':
         if conf.SELECTION_MATRIX:
             if conf.PUSH and ddp_params["mu_factor"] != 0:
                 np.savetxt("push_selection_matrix_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+                np.savetxt("push_selection_matrix_" + conf.TORQUE, U_sim, delimiter=',')
             elif conf.PUSH and ddp_params["mu_factor"] == 0:
                 np.savetxt("push_and_mu_factor_selection_matrix_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+                np.savetxt("push_and_mu_factor_selection_matrix_" + conf.TORQUE, U_sim, delimiter=',')
             elif ddp_params["mu_factor"] == 0:
                 np.savetxt("mu_factor_selection_matrix_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+                np.savetxt("mu_factor_selection_matrix_" + conf.TORQUE, U_sim, delimiter=',')
             else:
                 np.savetxt("selection_matrix_"+conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+                np.savetxt("selection_matrix_"+conf.TORQUE, U_sim, delimiter=',')
         else:
             np.savetxt("penalty_" + conf.TRAJECTORY_FILE, X_sim, delimiter=',')
+            np.savetxt("penalty_" + conf.TORQUE, U_sim, delimiter=',')
         np.savetxt("time_vec.csv", time_vec, delimiter=',')
 
     if conf.PLOT_TORQUES:

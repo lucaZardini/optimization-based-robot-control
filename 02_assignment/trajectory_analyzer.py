@@ -19,25 +19,33 @@ class TrajectoryAnalyzer:
 
 
 if __name__ == "__main__":
-    difference = TrajectoryAnalyzer.read_and_subtract("selection_matrix_trajectory.csv", "mu_factor_selection_matrix_trajectory.csv")
+    difference_traj = TrajectoryAnalyzer.read_and_subtract("penalty_trajectory.csv", "mu_factor_selection_matrix_trajectory.csv")
+    difference_torque = TrajectoryAnalyzer.read_and_subtract("penalty_torque.csv", "mu_factor_selection_matrix_torque.csv")
     time_vec = TrajectoryAnalyzer.read("time_vec.csv", ",")
-    first_method = TrajectoryAnalyzer.read("selection_matrix_trajectory.csv", ",")
+    first_method = TrajectoryAnalyzer.read("penalty_trajectory.csv", ",")
     second_method = TrajectoryAnalyzer.read("mu_factor_selection_matrix_trajectory.csv", ",")
 
     plt.figure()
-    plt.plot(time_vec, difference[:, 0], 'b')
-    plt.plot(time_vec, difference[:, 1], 'r')
+    plt.plot(time_vec, difference_traj[:, 0], 'b')
+    plt.plot(time_vec, difference_traj[:, 1], 'r')
     plt.gca().set_xlabel('Time [s]')
     plt.gca().set_ylabel('[rad]')
     plt.legend(["1st joint position difference", "2nd joint position difference"],
                loc='upper right')
 
     plt.figure()
-    plt.plot(time_vec, difference[:, 2], 'b')
-    plt.plot(time_vec, difference[:, 3], 'r')
+    plt.plot(time_vec, difference_traj[:, 2], 'b')
+    plt.plot(time_vec, difference_traj[:, 3], 'r')
     plt.gca().set_xlabel('Time [s]')
     plt.gca().set_ylabel('[rad/s]')
     plt.legend(["1st joint velocity difference", "2nd joint velocity difference"],
+               loc='upper right')
+    
+    plt.figure()
+    plt.plot(time_vec[:-1], difference_torque[:, 0], 'b')
+    plt.gca().set_xlabel('Time [s]')
+    plt.gca().set_ylabel('[Nm]')
+    plt.legend(["1st joint torque difference"],
                loc='upper right')
 
     plt.figure()
