@@ -298,7 +298,7 @@ if __name__ == '__main__':
     if conf.TORQUE_LIMITS:
         w_bounds = 1e2  # weight of the penalty on the control limits (barrier function)
         max_torque = 0.75  # control limit
-        beta = 0.1  # parameter of the barrier function determining the sharpness of the boundaries
+        beta = 0.001  # parameter of the barrier function determining the sharpness of the boundaries
         eps = 1e-3  # parameter of the barrier function to relax the boundaries
     if conf.SELECTION_MATRIX == 1:
         underact = 0  # underactuation penalty weight
