@@ -49,8 +49,9 @@ class DDPSolverLinearDyn(DDPSolver):
                + 0.5 * self.underact * np.dot(np.dot(np.array([[0, 0], [0, 1]]), u).T,
                                               np.dot(np.array([[0, 0], [0, 1]]), u))
         if self.CONTROL_BOUNDS:
-            pass  # TODO
-        # ... implement here the running cost term for taking into the control limits
+            if self.CONTROL_BOUNDS:
+                barr = - self.beta * np.log(self.max_torque + self.eps - u)
+                cost += 0.5 * self.w_bounds * np.dot(barr.T, barr)
         return cost
 
     def cost_final(self, x):
@@ -73,8 +74,8 @@ class DDPSolverLinearDyn(DDPSolver):
         ''' Gradient of the running cost w.r.t. u '''
         c_u = self.lmbda * u + self.underact * np.array([0, u[1]])
         if self.CONTROL_BOUNDS:
-            pass  # TODO
-        # ... implement here the derivative w.r.t u of the running cost term for taking into the control limits
+            barr = - self.beta * self.beta * np.log(self.max_torque + self.eps - u) / (self.max_torque + self.eps - u)
+            c_u += self.w_bounds * barr
         return c_u
 
     def cost_running_xx(self, i, x, u):
@@ -89,8 +90,8 @@ class DDPSolverLinearDyn(DDPSolver):
         ''' Hessian of the running cost w.r.t. u '''
         c_uu = self.lmbda * np.eye(self.nu) + self.underact * np.array([[0, 0], [0, 1]])
         if self.CONTROL_BOUNDS:
-            pass  # TODO
-        # ... implement here the second derivative w.r.t u of the running cost term for taking into the control limits
+            barr_uu = self.beta * self.beta * (1 - np.log(self.max_torque + self.eps - u)) / (self.max_torque + self.eps - u) ** 2
+            c_uu += barr_uu
         return c_uu
 
     def cost_running_xu(self, i, x, u):
