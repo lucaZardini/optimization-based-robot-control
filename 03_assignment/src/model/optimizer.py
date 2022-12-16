@@ -8,7 +8,7 @@ class OptimizerType(Enum):
     ADAM = "adam"
 
 
-class Optimizer:
+class OptimizerManager:
 
     def __init__(self, qvalue_learning_rate: int = 1e-3):
         self.qvalue_learning_rate = qvalue_learning_rate

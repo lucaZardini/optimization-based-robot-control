@@ -1,3 +1,6 @@
+from __future__ import absolute_import, annotations
+
+from abc import ABC, abstractmethod
 from enum import Enum
 
 import tensorflow as tf
@@ -10,33 +13,59 @@ from tensorflow.python.ops.numpy_ops import np_config
 np_config.enable_numpy_behavior()
 
 
-class DeepQNetwork(tf.keras.Model):
+class DQNType(Enum):
+    STANDARD = "standard"
 
-    def __init__(self, nx: int, nu: int, *args, **kwargs):
-        self.inputs = keras.layers.Input(shape=(nx + nu, 1))
-        self.state_out1 = keras.layers.Dense(16, activation="relu")(self.inputs)
-        self.state_out2 = keras.layers.Dense(32, activation="relu")(self.state_out1)
-        self.state_out3 = keras.layers.Dense(64, activation="relu")(self.state_out2)
-        self.state_out4 = keras.layers.Dense(64, activation="relu")(self.state_out3)
-        self.outputs = keras.layers.Dense(1)(self.state_out4)
-        super().__init__(self.inputs, self.outputs)
 
-    def call(self, inputs, training=None, mask=None):
-        x = self.state_out1(inputs)
-        x = self.state_out2(x)
-        x = self.state_out3(x)
-        x = self.state_out4(x)
-        return self.outputs(x)
+class DQNManager:
+
+    @staticmethod
+    def get_model(dqn_type: DQNType, nx: int, nu: int) -> DQNModel:
+        if dqn_type.value == DQNType.STANDARD:
+            return DeepQNetwork(nx, nu)
+
+
+class DQNModel(ABC):
+
+    @property
+    @abstractmethod
+    def model(self):
+        pass
+
+
+class DeepQNetwork(DQNModel):
+
+    def __init__(self, nx: int, nu: int):
+        """
+
+        :param nx:
+        :param nu:
+        """
+        inputs = keras.layers.Input(shape=(nx + nu, 1))
+        state_out1 = keras.layers.Dense(16, activation="relu")(inputs)
+        state_out2 = keras.layers.Dense(32, activation="relu")(state_out1)
+        state_out3 = keras.layers.Dense(64, activation="relu")(state_out2)
+        state_out4 = keras.layers.Dense(64, activation="relu")(state_out3)
+        outputs = keras.layers.Dense(1)(state_out4)
+        self._model = tf.keras.Model(inputs, outputs)
+
+    @property
+    def model(self):
+        return self._model
+
+    def initialize_weights(self, critic: DeepQNetwork):
+        """
+
+        :param critic:
+        :return:
+        """
+        self.model.set_weights(critic.model.get_weights())
 
 # nx = 2
 # nu = 1
 #
 #
-#
 # Q.summary()
-#
-# # Set initial weights of targets equal to those of the critic
-# Q_target.set_weights(Q.get_weights())
 #
 #
 # w = Q.get_weights()
