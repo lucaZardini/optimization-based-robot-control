@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.keras import layers
+from tensorflow import keras
 import numpy as np
 from numpy.random import randint, uniform
 
@@ -18,12 +18,12 @@ def tf2np(y):
 
 def get_critic(nx, nu):
     ''' Create the neural network to represent the Q function '''
-    inputs = layers.Input(shape=(nx+nu,1))
-    state_out1 = layers.Dense(16, activation="relu")(inputs) 
-    state_out2 = layers.Dense(32, activation="relu")(state_out1) 
-    state_out3 = layers.Dense(64, activation="relu")(state_out2) 
-    state_out4 = layers.Dense(64, activation="relu")(state_out3)
-    outputs = layers.Dense(1)(state_out4) 
+    inputs = keras.layers.Input(shape=(nx+nu,1))
+    state_out1 = keras.layers.Dense(16, activation="relu")(inputs)
+    state_out2 = keras.layers.Dense(32, activation="relu")(state_out1)
+    state_out3 = keras.layers.Dense(64, activation="relu")(state_out2)
+    state_out4 = keras.layers.Dense(64, activation="relu")(state_out3)
+    outputs = keras.layers.Dense(1)(state_out4)
 
     model = tf.keras.Model(inputs, outputs)
 
