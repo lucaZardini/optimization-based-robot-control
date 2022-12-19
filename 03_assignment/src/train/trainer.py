@@ -19,6 +19,7 @@ class Trainer:
         self.target = target
         self.optimizer = optimizer
         self.discount = discount
+        # self.env = env  # TODO
 
     def update(self, xu_batch, cost_batch, xu_next_batch):
         """

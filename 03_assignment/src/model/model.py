@@ -5,10 +5,8 @@ from enum import Enum
 
 import tensorflow as tf
 from tensorflow import keras
-import numpy as np
-from numpy.random import randint, uniform
 
-from tensorflow.python.ops.numpy_ops import np_config
+from tensorflow.python.ops.numpy_ops import np_config  # TODO: spostare dove ha senso farlo.
 
 np_config.enable_numpy_behavior()
 
@@ -21,6 +19,13 @@ class DQNManager:
 
     @staticmethod
     def get_model(dqn_type: DQNType, nx: int, nu: int) -> DQNModel:
+        """
+
+        :param dqn_type:
+        :param nx:
+        :param nu:
+        :return:
+        """
         if dqn_type.value == DQNType.STANDARD:
             return DeepQNetwork(nx, nu)
 
@@ -30,6 +35,14 @@ class DQNModel(ABC):
     @property
     @abstractmethod
     def model(self):
+        pass
+
+    @abstractmethod
+    def save_weights(self, filename: str):
+        pass
+
+    @abstractmethod
+    def load_weights(self, filename: str):
         pass
 
 
@@ -60,6 +73,12 @@ class DeepQNetwork(DQNModel):
         :return:
         """
         self.model.set_weights(critic.model.get_weights())
+
+    def save_weights(self, filename: str):
+        self.model.save_weights(filename)
+
+    def load_weights(self, filename: str):
+        self.model.load_weights(filename)
 
 # nx = 2
 # nu = 1
