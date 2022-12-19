@@ -21,6 +21,8 @@ class Trainer:
         self.discount = discount
         # self.env = env  # TODO
 
+    # The trainer should predict a new state and then put it in the experience replay. Then, every n step, update the
+    # Q target and run the update function below with the batches.
     def update(self, xu_batch, cost_batch, xu_next_batch):
         """
         Update the weights of the Q network using the specified batch of data
