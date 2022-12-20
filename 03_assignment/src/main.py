@@ -11,7 +11,6 @@ class DefaultValues:
     LEARNING_RATE = 1e-3
     EXPERIENCE_REPLAY = 10000
     BATCH_SIZE = 32
-    # TODO: How many times update the target parameters
     # TODO: count on how many frames to collect before start training
     NX = 2
     NU = 1
