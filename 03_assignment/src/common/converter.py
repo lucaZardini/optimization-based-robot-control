@@ -5,6 +5,9 @@ import numpy as np
 
 
 class Converter:
+    """
+    This class is able to convert values from and to numpy.
+    """
 
     @staticmethod
     def np2tf(y: np.ndarray):

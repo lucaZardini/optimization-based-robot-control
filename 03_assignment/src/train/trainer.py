@@ -7,19 +7,35 @@ from keras.optimizers.optimizer_experimental.optimizer import Optimizer as Keras
 
 class Trainer:
 
-    def __init__(self, critic: DQNModel, target: DQNModel, optimizer: KerasOptimizer, discount: float = 0.99):
+    def __init__(self, critic: DQNModel, target: DQNModel, optimizer: KerasOptimizer, discount: float,
+                 update_target_params: int):
         """
+        This class perform the training of a neural network.
 
-        :param critic:
-        :param target:
-        :param optimizer:
-        :param discount:
+        :param critic: the critic model
+        :param target: the target model
+        :param optimizer: the optimizer
+        :param discount: the discount factor
+        :param update_target_params: every which steps updating the target parameters
         """
         self.critic = critic
         self.target = target
         self.optimizer = optimizer
         self.discount = discount
         # self.env = env  # TODO
+
+    def train(self):
+        """
+        This method implement the algorithm seen in class, the one used to train a model with reinforcement larning.
+        The class already has everything it needs:
+        - the critic model (The Q model)
+        - the target model (The Q target model)
+        - the optimizer
+        - the environment to interact with
+        - the discount factor
+        - the factor that describes at which steps updating the target parameters
+        """
+        pass
 
     # The trainer should predict a new state and then put it in the experience replay. Then, every n step, update the
     # Q target and run the update function below with the batches.
