@@ -1,7 +1,7 @@
 import numpy as np
 import pinocchio as pin
-from environment.display import Display
-from environment.visual import Visual
+from environment.single_pendulum.display import Display
+from environment.single_pendulum.visual import Visual
 from numpy.linalg import inv
 import time
 
