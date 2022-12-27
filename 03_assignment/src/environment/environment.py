@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Optional
 
 
 class Environment(ABC):
@@ -8,7 +9,7 @@ class Environment(ABC):
         pass
 
     @abstractmethod
-    def reset(self, x):
+    def reset(self, x: Optional = None):
         pass
 
     @abstractmethod

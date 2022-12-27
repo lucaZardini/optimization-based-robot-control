@@ -12,6 +12,9 @@ class DefaultValues:
     EXPERIENCE_REPLAY = 10000
     BATCH_SIZE = 32
     UPDATE_TARGET_PARAMS = 4
+    EPSILON_START = 1.00
+    EPSILON_DECAY = 0.999985
+    EPSILON_MIN = 0.02
 
 
 if __name__ == "__main__":
@@ -26,6 +29,9 @@ if __name__ == "__main__":
     arg_parser.add_argument("--experience-replay-size", type=float, required=False, default=DefaultValues.EXPERIENCE_REPLAY, help="Experience replay size")
     arg_parser.add_argument("--bach-size", type=float, required=False, default=DefaultValues.BATCH_SIZE, help="Batch size")
     arg_parser.add_argument("--update-target-param", type=int, required=False, default=DefaultValues.UPDATE_TARGET_PARAMS, help="At which steps upading the target parameters")
+    arg_parser.add_argument("--epsilon-start", type=float, required=False, default=DefaultValues.EPSILON_START, help="Epsilon start")
+    arg_parser.add_argument("--epsilon-decay", type=float, required=False, default=DefaultValues.EPSILON_DECAY, help="Epsilon decay")
+    arg_parser.add_argument("--epsilon-min", type=float, required=False, default=DefaultValues.EPSILON_MIN, help="Epsilon min")
 
     args = arg_parser.parse_args()
 
@@ -36,5 +42,6 @@ if __name__ == "__main__":
             raise ValueError("You need to specify the path to the pretrained weights")
     env_type = EnvironmentType(args.env)
 
-    # TODO: add the new parameter to the manager
-    manager = Manager(args.discount_factor, args.learning_rate, optimizer_type, model_type, model_type, env_type, args.update_target_param)
+    manager = Manager(args.discount_factor, args.learning_rate, optimizer_type, model_type, model_type, env_type,
+                      args.batch_size, args.update_target_param, args.epsilon_start, args.epsilon_decay,
+                      args.epsilon_min, args.experience_replay_size)

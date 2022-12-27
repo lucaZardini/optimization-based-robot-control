@@ -1,7 +1,8 @@
+from typing import Optional
+
 from environment.environment import Environment
 from environment.single_pendulum.pendulum_template import Pendulum
 import numpy as np
-from numpy import pi
 import time
 
 
@@ -89,8 +90,9 @@ class SinglePendulum(Environment):
     # def i2x(self, i):
     #     return [i % self.nq, int(np.floor(i / self.nq))]
 
-    def reset(self, x=None):
+    def reset(self, x: Optional = None):
         if x is None:
+            # Initialize to basso e zero velocità.
             self.x = np.random.randint(0, MAX_INT)  # TODO. Inizializza con il pendolo in basso e zero velocità.
         else:
             self.x = x

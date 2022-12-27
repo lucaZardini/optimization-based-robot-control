@@ -4,12 +4,14 @@ import tensorflow as tf
 from environment.environment import Environment
 from model.model import DQNModel
 from keras.optimizers.optimizer_experimental.optimizer import Optimizer as KerasOptimizer
+from train.experience_replay import ExperienceReplay
 
 
 class Trainer:
 
     def __init__(self, critic: DQNModel, target: DQNModel, optimizer: KerasOptimizer, environment: Environment,
-                 discount: float, update_target_params: int):
+                 discount: float, batch_size: int, update_target_params: int, epsilon_start: float, epsilon_decay: float,
+                 epsilon_min: float, buffer_size: int):
         """
         This class perform the training of a neural network.
 
@@ -18,14 +20,25 @@ class Trainer:
         :param optimizer: the optimizer
         :param environment: the environment
         :param discount: the discount factor
+        :param batch_size: the batch size
         :param update_target_params: every which steps updating the target parameters
+        :param epsilon_start: the start value of the epsilon param
+        :param epsilon_decay: decay value of the epsilon
+        :param epsilon_min: minimum value of epsilon
+        :param buffer_size: the buffer size of the experience replay
         """
         self.critic = critic
         self.target = target
         self.optimizer = optimizer
         self.discount = discount
         self.env = environment
+        self.batch_size = batch_size
         self.update_target_params = update_target_params
+        self.epsilon_start = epsilon_start
+        self.epsilon_decay = epsilon_decay
+        self.epsilon_min = epsilon_min
+        self.buffer_size = buffer_size
+        self.experience_replay = ExperienceReplay(self.buffer_size, self.batch_size)
 
     def train(self):
         """
@@ -37,18 +50,30 @@ class Trainer:
         - the environment to interact with
         - the discount factor
         - the factor that describes at which steps updating the target parameters
+        - the batch size
+        - the epsilon values
+        - the experience replay size
         """
 
         # Initialize critic already done
         # Initialize target
         self.target.initialize_weights(self.critic)
 
-        # Experience replay buffer  # TODO
-
         # Initialize the environment
-        # self.env.reset()  # TODO
+        self.env.reset()
 
-        # Epsilon start and epsilon min, eps decay  # TODO
+        # Start the loop understanding the convergence condition
+            # sample new epsilon
+            # choose next action using epsilon greedy policy
+            # take the action, get the cost and the next state (env.step(u))
+            # save the transition in the experience replay buffer (self.experience_replay.append(transition))
+
+            # if enough experience
+                # sample random minibatch from experience replay
+                # get the cost and call the update function
+
+                # if step % update_target_params == 0
+                    # update the target weights with the critic ones.
 
 
 
