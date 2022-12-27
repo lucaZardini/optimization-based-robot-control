@@ -1,10 +1,11 @@
+from environment.environment import Environment
 from environment.single_pendulum.pendulum_template import Pendulum
 import numpy as np
 from numpy import pi
 import time
 
 
-class SinglePendulum:
+class SinglePendulum(Environment):
     '''
     Discrete Pendulum environment. Joint angle, velocity and torque are discretized
     with the specified steps. Joint velocity and torque are saturated.
@@ -24,20 +25,20 @@ class SinglePendulum:
         # self.nq = nq  # Number of discretization steps for joint angle
         # self.nv = nv  # Number of discretization steps for joint velocity
         # self.vMax = vMax  # Max velocity (v in [-vmax,vmax])
-        self.nu = nu  # Number of discretization steps for joint torque
+        self._nu = nu  # Number of discretization steps for joint torque
         self.uMax = uMax  # Max torque (u in [-umax,umax])
         self.dt = dt  # time step
         # self.DQ = 2 * pi / nq  # discretization resolution for joint angle
         # self.DV = 2 * vMax / nv  # discretization resolution for joint velocity
         self.DU = 2 * uMax / nu  # discretization resolution for joint torque
 
-    # @property
-    # def nqv(self):
-    #     return [self.nq, self.nv]
-    #
-    # @property
-    # def nx(self):
-    #     return self.nq * self.nv
+    @property
+    def nu(self) -> int:
+        return 1
+
+    @property
+    def nx(self) -> int:
+        return 2
 
     @property
     def goal(self):  # TODO
@@ -71,7 +72,7 @@ class SinglePendulum:
     #
 
     def d2cu(self, iu):
-        iu = np.clip(iu, 0, self.nu - 1) - (self.nu - 1) / 2
+        iu = np.clip(iu, 0, self._nu - 1) - (self._nu - 1) / 2
         return iu * self.DU
     #
     # def d2c(self, iqv):
@@ -90,13 +91,13 @@ class SinglePendulum:
 
     def reset(self, x=None):
         if x is None:
-            self.x = np.random.randint(0, MAX_INT)  # TODO. x deve avere 2 dimensioni, quindi due random? U la devo discretizzare non appena arriva il risultato della nn?
+            self.x = np.random.randint(0, MAX_INT)  # TODO. Inizializza con il pendolo in basso e zero velocità.
         else:
             self.x = x
         return self.x
 
     def step(self, u):
-        cost = -1 if self.x == self.goal else 0
+        cost = -1 if np.array_equal(self.x, self.goal) else 0
         self.x = self.dynamics(self.x, u)
         return self.x, cost
 
@@ -144,26 +145,3 @@ class SinglePendulum:
     #     plt.xlabel("x")
     #     plt.ylabel("u")
     #     plt.show()
-#
-#
-# if __name__ == "__main__":
-#     print("Start tests")
-#     env = DPendulum()
-#     nq = env.nq
-#     nv = env.nv
-#
-#     # sanity checks
-#     for i in range(nq * nv):
-#         x = env.i2x(i)
-#         i_test = env.x2i(x)
-#         if (i != i_test):
-#             print("ERROR! x2i(i2x(i))=", i_test, "!= i=", i)
-#
-#         xc = env.d2c(x)
-#         x_test = env.c2d(xc)
-#         if (x_test[0] != x[0] or x_test[1] != x[1]):
-#             print("ERROR! c2d(d2c(x))=", x_test, "!= x=", x)
-#         xc_test = env.d2c(x_test)
-#         if (np.linalg.norm(xc - xc_test) > 1e-10):
-#             print("ERROR! xc=", xc, "xc_test=", xc_test)
-#     print("Tests finished")

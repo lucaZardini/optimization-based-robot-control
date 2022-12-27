@@ -1,5 +1,8 @@
 from enum import Enum
 
+from environment.environment import Environment
+from environment.single_pendulum.single_pendulum import SinglePendulum
+
 
 class EnvironmentType(Enum):
     """
@@ -12,11 +15,12 @@ class EnvironmentType(Enum):
 class EnvironmentManager:
 
     @staticmethod
-    def get_environment(env_type: EnvironmentType):
+    def get_environment(env_type: EnvironmentType) -> Environment:
         """
         Return the desired environment.
 
         :param env_type: the type of environment.
         :return: the desired environment.
         """
-        pass
+        if env_type == EnvironmentType.SINGLE_PENDULUM:
+            return SinglePendulum()

@@ -11,9 +11,6 @@ class DefaultValues:
     LEARNING_RATE = 1e-3
     EXPERIENCE_REPLAY = 10000
     BATCH_SIZE = 32
-    # TODO: count on how many frames to collect before start training
-    NX = 2
-    NU = 1
     UPDATE_TARGET_PARAMS = 4
 
 
@@ -21,16 +18,14 @@ if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description="Reinforcement learning")
     arg_parser.add_argument("--model", type=str, required=False, default="standard", help="The model to train or to lead")
     arg_parser.add_argument("--train", type=bool, default=True, required=False, help="Train or lead a pretrained model. If you want to load a pretrained model, the path is required")
-    arg_parser.add_argument("--weight_path", type=str, required=False, help="The path to the weights of the pretrained model")  # TODO default
+    arg_parser.add_argument("--weight-path", type=str, required=False, help="The path to the weights of the pretrained model")  # TODO default
     arg_parser.add_argument("--optimizer", type=str, required=False, help="Optimizer used to train the model, default is adam", default="adam")
     arg_parser.add_argument("--env", type=str, required=False, default="single_pendulum", help="The environment to train/load the model")
-    arg_parser.add_argument("--discount_factor", type=float, required=False, default=DefaultValues.DISCOUNT, help="Discount factor")
-    arg_parser.add_argument("--learning_rate", type=float, required=False, default=DefaultValues.LEARNING_RATE, help="Learning rate")
-    arg_parser.add_argument("--nx", type=int, required=False, default=DefaultValues.NX, help="Number of states")  # TODO: probably property of the environment itself
-    arg_parser.add_argument("--nu", type=int, required=False, default=DefaultValues.NU, help="Number of controls")  # TODO: probably property of the environment itself
-    arg_parser.add_argument("--experience_replay_size", type=float, required=False, default=DefaultValues.EXPERIENCE_REPLAY, help="Experience replay size")
-    arg_parser.add_argument("--bach_size", type=float, required=False, default=DefaultValues.BATCH_SIZE, help="Batch size")
-    arg_parser.add_argument("--update_target_param", type=int, required=False, default=DefaultValues.UPDATE_TARGET_PARAMS, help="At which steps upading the target parameters")
+    arg_parser.add_argument("--discount-factor", type=float, required=False, default=DefaultValues.DISCOUNT, help="Discount factor")
+    arg_parser.add_argument("--learning-rate", type=float, required=False, default=DefaultValues.LEARNING_RATE, help="Learning rate")
+    arg_parser.add_argument("--experience-replay-size", type=float, required=False, default=DefaultValues.EXPERIENCE_REPLAY, help="Experience replay size")
+    arg_parser.add_argument("--bach-size", type=float, required=False, default=DefaultValues.BATCH_SIZE, help="Batch size")
+    arg_parser.add_argument("--update-target-param", type=int, required=False, default=DefaultValues.UPDATE_TARGET_PARAMS, help="At which steps upading the target parameters")
 
     args = arg_parser.parse_args()
 
@@ -42,4 +37,4 @@ if __name__ == "__main__":
     env_type = EnvironmentType(args.env)
 
     # TODO: add the new parameter to the manager
-    manager = Manager(args.discount_factor, args.learning_rate, optimizer_type, model_type, model_type, args.nx, args.nu, env_type, args.update_target_param)
+    manager = Manager(args.discount_factor, args.learning_rate, optimizer_type, model_type, model_type, env_type, args.update_target_param)

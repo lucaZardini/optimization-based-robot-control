@@ -1,4 +1,4 @@
-from environment.environment_type import EnvironmentType
+from environment.environment_type import EnvironmentType, EnvironmentManager
 from model.model import DQNType, DQNManager
 from model.optimizer import OptimizerType, OptimizerManager
 from train.trainer import Trainer
@@ -7,7 +7,7 @@ from train.trainer import Trainer
 class Manager:
 
     def __init__(self, discount: float, learning_rate: int, optimizer_type: OptimizerType, critic_type: DQNType,
-                 target_type: DQNType, nx: int, nu: int, env_type: EnvironmentType, update_target_params: int):
+                 target_type: DQNType, env_type: EnvironmentType, update_target_params: int):
         """
         This class is the entry point of the project. It dispatches every possible functionality implemented.
 
@@ -21,12 +21,12 @@ class Manager:
         :param env_type: the type of environment to interact with
         :param update_target_params: every which steps update the target parameters
         """
-        self.critic = DQNManager.get_model(critic_type, nx, nu)
-        self.target = DQNManager.get_model(target_type, nx, nu)
+        self.environment = EnvironmentManager.get_environment(env_type)
+        self.critic = DQNManager.get_model(critic_type, self.environment.nx, self.environment.nu)
+        self.target = DQNManager.get_model(target_type, self.environment.nx, self.environment.nu)
         self.optimizer_manager = OptimizerManager(qvalue_learning_rate=learning_rate)
         self.optimizer = self.optimizer_manager.get_optimizer(optimizer_type)
-        # self.environment = self.  # TODO
-        self.trainer = Trainer(self.critic, self.target, self.optimizer, discount, update_target_params)  # TODO: environment
+        self.trainer = Trainer(self.critic, self.target, self.optimizer, self.environment, discount, update_target_params)
 
     def train(self):
         """

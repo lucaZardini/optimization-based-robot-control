@@ -73,6 +73,14 @@ class DQNModel(ABC):
         """
         self.model.load_weights(filename)
 
+    def initialize_weights(self, critic: DQNModel):
+        """
+        Initialize the weights of the target model, given the critic one.
+
+        :param critic: the critic model to copy the weights.
+        """
+        self.model.set_weights(critic.model.get_weights())
+
 
 class DeepQNetwork(DQNModel):
 
@@ -94,14 +102,6 @@ class DeepQNetwork(DQNModel):
     @property
     def model(self):
         return self._model
-
-    def initialize_weights(self, critic: DeepQNetwork):
-        """
-        Initialize the weights of the target model, given the critic one.
-
-        :param critic: the critic model to copy the weights.
-        """
-        self.model.set_weights(critic.model.get_weights())
 
 
 # nx = 2
