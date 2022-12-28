@@ -102,37 +102,3 @@ class DeepQNetwork(DQNModel):
     @property
     def model(self):
         return self._model
-
-
-# nx = 2
-# nu = 1
-#
-#
-# Q.summary()
-#
-#
-# w = Q.get_weights()
-# for i in range(len(w)):
-#    print("Shape Q weights layer", i, w[i].shape)
-#
-# for i in range(len(w)):
-#    print("Norm Q weights layer", i, np.linalg.norm(w[i]))
-#
-# print("\nDouble the weights")
-# for i in range(len(w)):
-#    w[i] *= 2
-# Q.set_weights(w)
-#
-# w = Q.get_weights()
-# for i in range(len(w)):
-#    print("Norm Q weights layer", i, np.linalg.norm(w[i]))
-#
-# print("\nSave NN weights to file (in HDF5)")
-# Q.save_weights("namefile.h5")
-#
-# print("Load NN weights from file\n")
-# Q_target.load_weights("namefile.h5")
-#
-# w = Q_target.get_weights()
-# for i in range(len(w)):
-#    print("Norm Q weights layer", i, np.linalg.norm(w[i]))

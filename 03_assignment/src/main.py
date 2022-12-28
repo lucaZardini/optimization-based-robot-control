@@ -15,6 +15,8 @@ class DefaultValues:
     EPSILON_START = 1.00
     EPSILON_DECAY = 0.999985
     EPSILON_MIN = 0.02
+    MAX_ITERATIONS = 100000  # TODO
+    EPISODES = 1000  # TODO
 
 
 if __name__ == "__main__":
@@ -32,6 +34,9 @@ if __name__ == "__main__":
     arg_parser.add_argument("--epsilon-start", type=float, required=False, default=DefaultValues.EPSILON_START, help="Epsilon start")
     arg_parser.add_argument("--epsilon-decay", type=float, required=False, default=DefaultValues.EPSILON_DECAY, help="Epsilon decay")
     arg_parser.add_argument("--epsilon-min", type=float, required=False, default=DefaultValues.EPSILON_MIN, help="Epsilon min")
+    arg_parser.add_argument("--max-iterations", type=int, required=False, default=DefaultValues.MAX_ITERATIONS, help="max iterations")
+    arg_parser.add_argument("--episodes", type=int, required=False, default=DefaultValues.EPISODES, help="episodes")
+    arg_parser.add_argument("--experience-to-learn", type=int, required=False, default=2 * DefaultValues.BATCH_SIZE, help="Number of experience to collect before starting to train the model")
 
     args = arg_parser.parse_args()
 
@@ -44,4 +49,5 @@ if __name__ == "__main__":
 
     manager = Manager(args.discount_factor, args.learning_rate, optimizer_type, model_type, model_type, env_type,
                       args.batch_size, args.update_target_param, args.epsilon_start, args.epsilon_decay,
-                      args.epsilon_min, args.experience_replay_size)
+                      args.epsilon_min, args.experience_replay_size, args.max_iterations, args.episodes,
+                      args.experience_to_learn)

@@ -45,61 +45,24 @@ class SinglePendulum(Environment):
     def goal(self):  # TODO
         return [0., 0.]
 
-    # # Continuous to discrete
-    # def c2dq(self, q):
-    #     q = (q + pi) % (2 * pi)
-    #     return int(np.floor(q / self.DQ)) % self.nq
-    #
-    # def c2dv(self, v):
-    #     v = np.clip(v, -self.vMax + 1e-3, self.vMax - 1e-3)
-    #     return int(np.floor((v + self.vMax) / self.DV))
-    #
     def c2du(self, u):
         u = np.clip(u, -self.uMax + 1e-3, self.uMax - 1e-3)
         return int(np.floor((u + self.uMax) / self.DU))
-    #
-    # def c2d(self, qv):
-    #     '''From continuous to 2d discrete.'''
-    #     return np.array([self.c2dq(qv[0]), self.c2dv(qv[1])])
-    #
-    # # Discrete to continuous
-    # def d2cq(self, iq):
-    #     iq = np.clip(iq, 0, self.nq - 1)
-    #     return iq * self.DQ - pi + 0.5 * self.DQ
-    #
-    # def d2cv(self, iv):
-    #     iv = np.clip(iv, 0, self.nv - 1) - (self.nv - 1) / 2
-    #     return iv * self.DV
-    #
 
     def d2cu(self, iu):
         iu = np.clip(iu, 0, self._nu - 1) - (self._nu - 1) / 2
         return iu * self.DU
-    #
-    # def d2c(self, iqv):
-    #     '''From 2d discrete to continuous'''
-    #     return np.array([self.d2cq(iqv[0]), self.d2cv(iqv[1])])
-    #
-    # ''' From 2d discrete to 1d discrete '''
-    #
-    # def x2i(self, x):
-    #     return x[0] + x[1] * self.nq
-    #
-    # ''' From 1d discrete to 2d discrete '''
-    #
-    # def i2x(self, i):
-    #     return [i % self.nq, int(np.floor(i / self.nq))]
 
     def reset(self, x: Optional = None):
         if x is None:
             # Initialize to basso e zero velocità.
-            self.x = np.random.randint(0, MAX_INT)  # TODO. Inizializza con il pendolo in basso e zero velocità.
+            self.x = np.random.random(2)
         else:
             self.x = x
         return self.x
 
     def step(self, u):
-        cost = -1 if np.array_equal(self.x, self.goal) else 0
+        cost = -1 if np.array_equal(self.xc, self.goal) else 0
         self.x = self.dynamics(self.x, u)
         return self.x, cost
 
