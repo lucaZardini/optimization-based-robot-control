@@ -1,7 +1,13 @@
+import numpy as np
 from environment.environment_type import EnvironmentType, EnvironmentManager
-from model.model import DQNType, DQNManager
+from simulate.simulate import Simulator
+from model.model import DQNType, DQNManager, DQNModel
 from model.optimizer import OptimizerType, OptimizerManager
 from train.trainer import Trainer
+
+import logging
+logger = logging.Logger("manager")
+logger.addHandler(logging.StreamHandler())
 
 
 class Manager:
@@ -38,11 +44,14 @@ class Manager:
                                update_target_params, epsilon_start, epsilon_decay, epsilon_min, buffer_size,
                                max_iterations, episodes, experience_to_learn)
 
-    def train(self):
+    def train(self, filename: str):
         """
         Perform the training procedure of the models.
         """
-        self.trainer.train()
+        logger.info(f"Starting to train the model [{self.critic.type.value}] and store the weights in [{filename}]")
+        self.trainer.train(filename)
 
-    def load(self):  # TODO
-        pass
+    def load(self, model_type: DQNType, filename: str):  # TODO
+        model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
+        simulator = Simulator(model, self.environment)
+        simulator.simulate(np.array([180., 0.]))

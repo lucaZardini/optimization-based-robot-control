@@ -3,6 +3,8 @@ from __future__ import absolute_import, annotations
 import random
 from typing import List
 
+import numpy as np
+
 
 class ExperienceReplay:
 
@@ -28,8 +30,18 @@ class ExperienceReplay:
 
 class Transition:
 
-    def __init__(self, state, action, cost, next_state):
+    def __init__(self, state: np.array, action: np.array, cost: int, next_state: np.array):
         self.state = state
         self.action = action
         self.cost = cost
         self.next_state = next_state
+
+    def get_state_vector(self) -> np.ndarray:
+        return np.array([[x] for x in self.state])
+
+    def get_next_state_vector(self) -> np.ndarray:
+        return np.array([[x] for x in self.next_state])
+
+    def get_state_and_control_vector(self) -> np.ndarray:
+        state_vector = self.get_state_vector()
+        return np.append(state_vector, [[x] for x in self.action], axis=0)

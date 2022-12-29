@@ -7,6 +7,8 @@ from model.optimizer import OptimizerType
 
 
 class DefaultValues:
+    DQN = "state"
+    ENV = "single_pendulum"
     DISCOUNT = 0.99
     LEARNING_RATE = 1e-3
     EXPERIENCE_REPLAY = 10000
@@ -15,21 +17,21 @@ class DefaultValues:
     EPSILON_START = 1.00
     EPSILON_DECAY = 0.999985
     EPSILON_MIN = 0.02
-    MAX_ITERATIONS = 100000  # TODO
-    EPISODES = 1000  # TODO
+    MAX_ITERATIONS = 1000  # TODO
+    EPISODES = 10  # TODO
 
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description="Reinforcement learning")
-    arg_parser.add_argument("--model", type=str, required=False, default="standard", help="The model to train or to lead")
-    arg_parser.add_argument("--train", type=bool, default=True, required=False, help="Train or lead a pretrained model. If you want to load a pretrained model, the path is required")
-    arg_parser.add_argument("--weight-path", type=str, required=False, help="The path to the weights of the pretrained model")  # TODO default
+    arg_parser.add_argument("--model", type=str, required=False, default=DefaultValues.DQN, help="The model to train or to lead")
+    arg_parser.add_argument("--train", type=bool, default=False, required=False, help="Train or lead a pretrained model. If you want to load a pretrained model, the path is required")
+    arg_parser.add_argument("--weight-path", type=str, required=True, help="The path to the weights of the pretrained model, or where to store the model")
     arg_parser.add_argument("--optimizer", type=str, required=False, help="Optimizer used to train the model, default is adam", default="adam")
-    arg_parser.add_argument("--env", type=str, required=False, default="single_pendulum", help="The environment to train/load the model")
+    arg_parser.add_argument("--env", type=str, required=False, default=DefaultValues.ENV, help="The environment to train/load the model")
     arg_parser.add_argument("--discount-factor", type=float, required=False, default=DefaultValues.DISCOUNT, help="Discount factor")
     arg_parser.add_argument("--learning-rate", type=float, required=False, default=DefaultValues.LEARNING_RATE, help="Learning rate")
     arg_parser.add_argument("--experience-replay-size", type=float, required=False, default=DefaultValues.EXPERIENCE_REPLAY, help="Experience replay size")
-    arg_parser.add_argument("--bach-size", type=float, required=False, default=DefaultValues.BATCH_SIZE, help="Batch size")
+    arg_parser.add_argument("--batch-size", type=float, required=False, default=DefaultValues.BATCH_SIZE, help="Batch size")
     arg_parser.add_argument("--update-target-param", type=int, required=False, default=DefaultValues.UPDATE_TARGET_PARAMS, help="At which steps upading the target parameters")
     arg_parser.add_argument("--epsilon-start", type=float, required=False, default=DefaultValues.EPSILON_START, help="Epsilon start")
     arg_parser.add_argument("--epsilon-decay", type=float, required=False, default=DefaultValues.EPSILON_DECAY, help="Epsilon decay")
@@ -51,3 +53,8 @@ if __name__ == "__main__":
                       args.batch_size, args.update_target_param, args.epsilon_start, args.epsilon_decay,
                       args.epsilon_min, args.experience_replay_size, args.max_iterations, args.episodes,
                       args.experience_to_learn)
+
+    if args.train:
+        manager.train(args.weight_path)
+    else:
+        manager.load(model_type, args.weight_path)

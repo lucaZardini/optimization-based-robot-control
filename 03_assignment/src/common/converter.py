@@ -23,3 +23,7 @@ class Converter:
         convert from tensorflow to numpy
         """
         return tf.squeeze(y).numpy()
+
+    @staticmethod
+    def batch_np2tf(y: np.ndarray):
+        return tf.convert_to_tensor(y)

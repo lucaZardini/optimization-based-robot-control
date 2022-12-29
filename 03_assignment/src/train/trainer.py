@@ -1,15 +1,17 @@
 from __future__ import absolute_import, annotations
 
-from typing import List
-
 from numpy.random import uniform
 
 import numpy as np
 import tensorflow as tf
 from environment.environment import Environment
-from model.model import DQNModel
+from model.model import DQNModel, DQNManager
 from keras.optimizers.optimizer_experimental.optimizer import Optimizer as KerasOptimizer
 from train.experience_replay import ExperienceReplay, Transition
+import logging
+
+logger = logging.Logger("trainer")
+logger.addHandler(logging.StreamHandler())
 
 
 class Trainer:
@@ -51,7 +53,7 @@ class Trainer:
         self.episodes = episodes
         self.experience_to_learn = experience_to_learn
 
-    def train(self):
+    def train(self, filename: str):
         """
         This method implement the algorithm seen in class, the one used to train a model with reinforcement larning.
         The class already has everything it needs:
@@ -67,30 +69,35 @@ class Trainer:
         """
 
         start_episodes = self.env.sample_random_start_episodes(self.episodes)
-
+        logger.info(f"Sampled the starting episodes. The length is [{len(start_episodes)}]")
         # Initialize critic already done
         # Initialize target
         self.target.initialize_weights(self.critic)
 
         # Initialize the environment
-        self.env.reset()
         total_steps = 0
-        for start_episode in start_episodes:
-
+        for number_episode, start_episode in enumerate(start_episodes):
+            logger.info(f"Running episode [{number_episode}]")
             self.env.reset(start_episode)
 
             # sample new epsilon
             epsilon = self.epsilon_start
             u = np.random.random()  # first action
             state = start_episode
+            transition = Transition(state, u, 0, 0)
             for iteration in range(self.max_iterations):
+                logger.info(f"Running iteration [{iteration}]")
                 total_steps += 1
                 epsilon *= self.epsilon_decay
                 # choose next action using epsilon greedy policy
                 if uniform() < epsilon:
+                    logger.info("Chose random action")
                     u = np.random.random()
                 else:
-                    u = self.critic.model(state, u)  # TODO understand the return value and the input
+                    logger.info("Chose model action")
+                    model_input = DQNManager.prepare_input(self.critic, transition)
+                    model_output = self.critic.model(model_input, training=False)
+                    u = DQNManager.get_action_from_output_model(self.critic, model_output)
 
                 discrete_u = self.env.c2du(u)
                 # take the action, get the cost and the next state
@@ -100,13 +107,15 @@ class Trainer:
                 transition = Transition(state, u, cost, next_state)
                 self.experience_replay.append(transition)
 
+                if self.experience_replay.size - 1 == self.experience_to_learn:
+                    logger.info("We have enough experience to train the model")
                 # if enough experience
                 if self.experience_replay.size > self.experience_to_learn:
                     # sample random minibatch from experience replay
                     # get the cost and call the update function
                     minibatch = self.experience_replay.sample_random_minibatch()
                     minibatch_cost = sum([transition.cost for transition in minibatch])
-                    next_minibatch = self._compute_next_minibatch(minibatch)
+                    minibatch, next_minibatch = DQNManager.prepare_minibatch(self.critic, minibatch)
                     self.update(minibatch, minibatch_cost, next_minibatch)
 
                 state = next_state
@@ -114,11 +123,14 @@ class Trainer:
                     self.target.initialize_weights(self.critic)
 
                 if converged:
+                    self.critic.save_weights(filename+str(total_steps)+".h5")
                     break
+
+        self.critic.save_weights(filename)
 
     # The trainer should predict a new state and then put it in the experience replay. Then, every n step, update the
     # Q target and run the update function below with the batches.
-    def update(self, xu_batch, cost_batch, xu_next_batch):
+    def update(self, xu_batch, cost_batch, xu_next_batch):  # TODO: update
         """
         Update the weights of the Q network using the specified batch of data
 
@@ -129,6 +141,7 @@ class Trainer:
         """
         # all inputs are tf tensors
         with tf.GradientTape() as tape:
+            logger.info("Updating the model...")
             # Operations are recorded if they are executed within this context manager and at least one of their inputs is being "watched".
             # Trainable variables (created by tf.Variable or tf.compat.v1.get_variable, where trainable=True is default in both cases) are automatically watched.
             # Tensors can be manually watched by invoking the watch method on this context manager.
@@ -143,14 +156,4 @@ class Trainer:
         Q_grad = tape.gradient(Q_loss, self.critic.model.trainable_variables)
         # Update the critic backpropagating the gradients
         self.optimizer.apply_gradients(zip(Q_grad, self.critic.model.trainable_variables))
-
-    def _compute_next_minibatch(self, minibatch: List[Transition]) -> List[Transition]:
-        next_minibatch: List[Transition] = []
-        for transition in minibatch:
-            input_model = [transition.state, transition.action]  # TODO
-            next_action = self.critic.model(input_model)  # TODO
-            discrete_u = self.env.c2du(next_action)
-            next_state, cost = self.env.step(discrete_u)
-            next_transition = Transition(transition.state, next_action, cost, next_state)
-            next_minibatch.append(next_transition)
-        return next_minibatch
+        logger.info("Model parameters updated")
