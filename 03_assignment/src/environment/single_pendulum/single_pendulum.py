@@ -63,6 +63,7 @@ class SinglePendulum(Environment):
 
     def step(self, u):
         cost = -1 if np.array_equal(self.x, self.goal) else 0
+        # cost = -1 if np.array_equal(self.x, self.goal) else float(np.sum(np.abs(self.x))) # TODO: possible idea, it does not work
         self.x = self.dynamics(self.x, u)
         return self.x, cost
 

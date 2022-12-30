@@ -15,7 +15,7 @@ class DefaultValues:
     BATCH_SIZE = 32
     UPDATE_TARGET_PARAMS = 4
     EPSILON_START = 1.00
-    EPSILON_DECAY = 0.999985
+    EPSILON_DECAY = 0.9985  # TODO: update epsilon decay and max iterations together because they are connected.
     EPSILON_MIN = 0.02
     MAX_ITERATIONS = 1000  # TODO
     EPISODES = 10  # TODO

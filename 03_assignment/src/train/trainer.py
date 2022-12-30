@@ -89,6 +89,7 @@ class Trainer:
                 logger.info(f"Running iteration [{iteration}]")
                 total_steps += 1
                 epsilon *= self.epsilon_decay
+                epsilon = max(epsilon, self.epsilon_min)
                 # choose next action using epsilon greedy policy
                 if uniform() < epsilon:
                     logger.info("Chose random action")

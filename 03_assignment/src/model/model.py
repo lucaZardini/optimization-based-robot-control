@@ -61,7 +61,6 @@ class DQNManager:
         if isinstance(dqn_model, DeepQNetwork):
             return Converter.np2tf(transition.get_state_and_control_vector())
         elif isinstance(dqn_model, NetworkWithOnlyState):
-            print(transition.get_state_vector())
             return Converter.np2tf(transition.get_state_vector())
 
     @staticmethod
