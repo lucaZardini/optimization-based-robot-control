@@ -27,6 +27,9 @@ class ExperienceReplay:
             raise IndexError(f"The size of the buffer ({len(self.buffer)}) is lower than the batch size ({self.batch_size})")
         return random.sample(self.buffer, self.batch_size)
 
+    def setup(self):
+        self.buffer = []
+
 
 class Transition:
 

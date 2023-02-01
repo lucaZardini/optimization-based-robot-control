@@ -18,7 +18,7 @@ class Converter:
         return out
 
     @staticmethod
-    def tf2np(y):  # TODO: guarda il tipo di  y
+    def tf2np(y):
         """
         convert from tensorflow to numpy
         """

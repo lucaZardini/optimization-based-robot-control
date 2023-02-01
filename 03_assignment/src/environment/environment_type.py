@@ -1,5 +1,6 @@
 from enum import Enum
 
+from environment.double_pendulum.double_pendulum_template import DoublePendulum
 from environment.environment import Environment
 from environment.single_pendulum.single_pendulum import SinglePendulum
 
@@ -10,6 +11,7 @@ class EnvironmentType(Enum):
     At every element corresponds a different environment.
     """
     SINGLE_PENDULUM = "single_pendulum"
+    DOUBLE_PENDULUM = "double_pendulum"
 
 
 class EnvironmentManager:
@@ -24,3 +26,5 @@ class EnvironmentManager:
         """
         if env_type == EnvironmentType.SINGLE_PENDULUM:
             return SinglePendulum()
+        elif env_type == EnvironmentType.DOUBLE_PENDULUM:
+            return DoublePendulum()

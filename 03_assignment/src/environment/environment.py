@@ -7,7 +7,7 @@ from numpy.random import random
 class Environment(ABC):
 
     @abstractmethod
-    def step(self, u):
+    def step(self, u, x: Optional = None):
         pass
 
     @abstractmethod

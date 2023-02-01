@@ -167,7 +167,7 @@ class Pendulum:
         x[:self.nq] = modulePi(q)
         x[self.nq:] = np.clip(v, -self.vmax, self.vmax)
 
-        return x, -cost
+        return x, cost
 
     def render(self):  # TODO: this function basically show the system
         q = self.x[:self.nq]

@@ -23,6 +23,7 @@ class DQNType(Enum):
     """
     STANDARD = "standard"
     STATE = "state"
+    DISCRETE = "discrete"
 
 
 class DQNManager:
@@ -44,6 +45,8 @@ class DQNManager:
             return DeepQNetwork(nx, nu)
         elif dqn_type == DQNType.STATE:
             return NetworkWithOnlyState(nx)
+        elif dqn_type == DQNType.DISCRETE:
+            return DQNDiscrete(nx, nu)
 
     @staticmethod
     def load_model(dqn_type: DQNType, nx: int, nu: int, filename: str) -> DQNModel:
@@ -51,6 +54,8 @@ class DQNManager:
             model = DeepQNetwork(nx, nu)
         elif dqn_type == DQNType.STATE:
             model = NetworkWithOnlyState(nx)
+        elif dqn_type == DQNType.DISCRETE:
+            model = DQNDiscrete(nx, nu)
         else:
             raise ValueError(f"Support for model type [{dqn_type.value}] is not still available")
         model.load_weights(filename)
@@ -60,7 +65,7 @@ class DQNManager:
     def prepare_input(dqn_model: DQNModel, transition: Transition) -> EagerTensor:
         if isinstance(dqn_model, DeepQNetwork):
             return Converter.np2tf(transition.get_state_and_control_vector())
-        elif isinstance(dqn_model, NetworkWithOnlyState):
+        elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscrete):
             return Converter.np2tf(transition.get_state_vector())
 
     @staticmethod
@@ -70,12 +75,15 @@ class DQNManager:
             # return Converter.tf2np(model_output[])
         elif isinstance(dqn_model, NetworkWithOnlyState):
             return Converter.tf2np(model_output)
+        elif isinstance(dqn_model, DQNDiscrete):
+            output = np.argmax(Converter.tf2np(model_output))
+            return output
 
     @staticmethod
     def prepare_minibatch(dqn_model: DQNModel, minibatch: List[Transition]) -> Tuple[Tensor, Tensor]:
         if isinstance(dqn_model, DeepQNetwork):
             pass
-        elif isinstance(dqn_model, NetworkWithOnlyState):
+        elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscrete):
             np_minibatch = np.array([transition.get_state_vector() for transition in minibatch])
             np_next_minibatch = np.array([transition.get_next_state_vector() for transition in minibatch])
             return Converter.batch_np2tf(np_minibatch), Converter.batch_np2tf(np_next_minibatch)
@@ -181,3 +189,33 @@ class NetworkWithOnlyState(DQNModel):
     @property
     def type(self) -> DQNType:
         return DQNType.STATE
+
+
+class DQNDiscrete(DQNModel):
+
+    def __init__(self, nx: int, n_discrete_u: int):
+        """
+        A neural network that, given an input, returns as output n-discrete values, that are the discrete actions of
+        the network.
+
+        :param nx: the number of states
+        :param n_discrete_u: the number of discretization appied on control
+        """
+
+        inputs = keras.layers.Input(shape=(nx))
+        state_out1 = keras.layers.Dense(16, activation="relu")(inputs)
+        state_out2 = keras.layers.Dense(32, activation="relu")(state_out1)
+        state_out3 = keras.layers.Dense(64, activation="relu")(state_out2)
+        state_out4 = keras.layers.Dense(64, activation="relu")(state_out3)
+        state_out5 = keras.layers.Dense(32, activation="relu")(state_out4)
+        action = keras.layers.Dense(n_discrete_u)(state_out5)
+        softmaxed = keras.layers.Softmax()(action)
+        self._model = tf.keras.Model(inputs, softmaxed)
+
+    @property
+    def model(self) -> keras.Model:
+        return self._model
+
+    @property
+    def type(self) -> DQNType:
+        return DQNType.DISCRETE

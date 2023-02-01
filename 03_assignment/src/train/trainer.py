@@ -79,6 +79,7 @@ class Trainer:
         for number_episode, start_episode in enumerate(start_episodes):
             logger.info(f"Running episode [{number_episode}]")
             self.env.reset(start_episode)
+            # self.experience_replay.setup()
 
             # sample new epsilon
             epsilon = self.epsilon_start
@@ -86,30 +87,31 @@ class Trainer:
             state = start_episode
             transition = Transition(state, u, 0, 0)
             for iteration in range(self.max_iterations):
-                logger.info(f"Running iteration [{iteration}]")
+                if iteration % 100 == 0:
+                    logger.info(f"Running iteration [{iteration}]")
                 total_steps += 1
                 epsilon *= self.epsilon_decay
                 epsilon = max(epsilon, self.epsilon_min)
                 # choose next action using epsilon greedy policy
                 if uniform() < epsilon:
-                    logger.info("Chose random action")
-                    u = np.random.random()
+                    # logger.info("Chose random action")
+                    u = np.random.randint(0, 11)
                 else:
-                    logger.info("Chose model action")
+                    # logger.info("Chose model action")
                     model_input = DQNManager.prepare_input(self.critic, transition)
-                    model_output = self.critic.model(model_input, training=False)
+                    model_output = self.critic.model(model_input)
                     u = DQNManager.get_action_from_output_model(self.critic, model_output)
 
-                discrete_u = self.env.c2du(u)
                 # take the action, get the cost and the next state
-                next_state, cost = self.env.step(discrete_u)
+                next_state, cost = self.env.step(u)
+                # self.env.render()
                 converged = cost == -1
                 # save the transition in the experience replay buffer  # transition can be a class
                 transition = Transition(state, u, cost, next_state)
                 self.experience_replay.append(transition)
 
-                if self.experience_replay.size - 1 == self.experience_to_learn:
-                    logger.info("We have enough experience to train the model")
+                # if self.experience_replay.size - 1 == self.experience_to_learn:
+                #     logger.info("We have enough experience to train the model")
                 # if enough experience
                 if self.experience_replay.size > self.experience_to_learn:
                     # sample random minibatch from experience replay
@@ -119,7 +121,7 @@ class Trainer:
                     minibatch, next_minibatch = DQNManager.prepare_minibatch(self.critic, minibatch)
                     self.update(minibatch, minibatch_cost, next_minibatch)
 
-                state = next_state
+                state = np.copy(next_state)
                 if total_steps % self.update_target_params == 0:
                     self.target.initialize_weights(self.critic)
 
@@ -142,19 +144,18 @@ class Trainer:
         """
         # all inputs are tf tensors
         with tf.GradientTape() as tape:
-            logger.info("Updating the model...")
+            # logger.info("Updating the model...")
             # Operations are recorded if they are executed within this context manager and at least one of their inputs is being "watched".
             # Trainable variables (created by tf.Variable or tf.compat.v1.get_variable, where trainable=True is default in both cases) are automatically watched.
             # Tensors can be manually watched by invoking the watch method on this context manager.
-            target_values = self.target.model(xu_next_batch, training=True)
+            target_values = self.target.model(xu_next_batch, training=False)
             # Compute 1-step targets for the critic loss
             y = cost_batch + self.discount * target_values
             # Compute batch of Values associated to the sampled batch of states
-            Q_value = self.critic.model(xu_batch, training=True)
-            # Critic's loss function. tf.math.reduce_mean() computes the mean of elements across dimensions of a tensor
+            Q_value = self.critic.model(xu_batch, training=True)          # Critic's loss function. tf.math.reduce_mean() computes the mean of elements across dimensions of a tensor
             Q_loss = tf.math.reduce_mean(tf.math.square(y - Q_value))
             # Compute the gradients of the critic loss w.r.t. critic's parameters (weights and biases)
         Q_grad = tape.gradient(Q_loss, self.critic.model.trainable_variables)
         # Update the critic backpropagating the gradients
         self.optimizer.apply_gradients(zip(Q_grad, self.critic.model.trainable_variables))
-        logger.info("Model parameters updated")
+        # logger.info("Model parameters updated")

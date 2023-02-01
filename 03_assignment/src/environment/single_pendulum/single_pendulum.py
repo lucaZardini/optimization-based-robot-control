@@ -35,7 +35,7 @@ class SinglePendulum(Environment):
 
     @property
     def nu(self) -> int:
-        return 1
+        return 11
 
     @property
     def nx(self) -> int:
@@ -56,16 +56,15 @@ class SinglePendulum(Environment):
     def reset(self, x: Optional = None):
         if x is None:
             # Initialize to basso e zero velocità.
-            self.x = np.random.random(2)
+            self.x = np.copy(np.random.random(2))
         else:
-            self.x = x
+            self.x = np.copy(x)
         return self.x
 
-    def step(self, u):
-        cost = -1 if np.array_equal(self.x, self.goal) else 0
-        # cost = -1 if np.array_equal(self.x, self.goal) else float(np.sum(np.abs(self.x))) # TODO: possible idea, it does not work
-        self.x = self.dynamics(self.x, u)
-        return self.x, cost
+    def step(self, u,  x=None):
+        u = self.d2cu(u)
+        self.x, cost = self.pendulum.dynamics(self.x, u)
+        return np.copy(self.x), cost
 
     def render(self):
         q = self.x[0]

@@ -7,7 +7,7 @@ from model.optimizer import OptimizerType
 
 
 class DefaultValues:
-    DQN = "state"
+    DQN = "discrete"
     ENV = "single_pendulum"
     DISCOUNT = 0.99
     LEARNING_RATE = 1e-3
@@ -15,16 +15,16 @@ class DefaultValues:
     BATCH_SIZE = 32
     UPDATE_TARGET_PARAMS = 4
     EPSILON_START = 1.00
-    EPSILON_DECAY = 0.9985  # TODO: update epsilon decay and max iterations together because they are connected.
-    EPSILON_MIN = 0.02
-    MAX_ITERATIONS = 1000  # TODO
-    EPISODES = 10  # TODO
+    EPSILON_DECAY = 0.985  # TODO: update epsilon decay and max iterations together because they are connected.
+    EPSILON_MIN = 0.002
+    MAX_ITERATIONS = 500  # TODO
+    EPISODES = 20000  # TODO
 
 
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description="Reinforcement learning")
     arg_parser.add_argument("--model", type=str, required=False, default=DefaultValues.DQN, help="The model to train or to lead")
-    arg_parser.add_argument("--train", type=bool, default=True, required=False, help="Train or lead a pretrained model. If you want to load a pretrained model, the path is required")
+    arg_parser.add_argument("--train", type=bool, default=False, required=False, help="Train or lead a pretrained model. If you want to load a pretrained model, the path is required")
     arg_parser.add_argument("--weight-path", type=str, required=True, help="The path to the weights of the pretrained model, or where to store the model")
     arg_parser.add_argument("--optimizer", type=str, required=False, help="Optimizer used to train the model, default is adam", default="adam")
     arg_parser.add_argument("--env", type=str, required=False, default=DefaultValues.ENV, help="The environment to train/load the model")
