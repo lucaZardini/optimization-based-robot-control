@@ -6,6 +6,9 @@ from typing import List, Tuple
 
 import tensorflow as tf
 from common.converter import Converter
+from environment.double_pendulum.double_pendulum_template import DoublePendulum
+from environment.environment import Environment
+from environment.single_pendulum.single_pendulum import SinglePendulum
 from tensorflow import keras
 import numpy as np
 from tensorflow.python.framework.ops import EagerTensor, Tensor
@@ -23,6 +26,7 @@ class DQNType(Enum):
     """
     STANDARD = "standard"
     STATE = "state"
+    DISCRETE_SOFTMAX = "discrete_softmax"
     DISCRETE = "discrete"
 
 
@@ -45,6 +49,8 @@ class DQNManager:
             return DeepQNetwork(nx, nu)
         elif dqn_type == DQNType.STATE:
             return NetworkWithOnlyState(nx)
+        elif dqn_type == DQNType.DISCRETE_SOFTMAX:
+            return DQNDiscreteSoftmax(nx, nu)
         elif dqn_type == DQNType.DISCRETE:
             return DQNDiscrete(nx, nu)
 
@@ -54,6 +60,8 @@ class DQNManager:
             model = DeepQNetwork(nx, nu)
         elif dqn_type == DQNType.STATE:
             model = NetworkWithOnlyState(nx)
+        elif dqn_type == DQNType.DISCRETE_SOFTMAX:
+            model = DQNDiscreteSoftmax(nx, nu)
         elif dqn_type == DQNType.DISCRETE:
             model = DQNDiscrete(nx, nu)
         else:
@@ -65,28 +73,38 @@ class DQNManager:
     def prepare_input(dqn_model: DQNModel, transition: Transition) -> EagerTensor:
         if isinstance(dqn_model, DeepQNetwork):
             return Converter.np2tf(transition.get_state_and_control_vector())
-        elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscrete):
+        elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscreteSoftmax) or isinstance(
+                dqn_model, DQNDiscrete):
             return Converter.np2tf(transition.get_state_vector())
 
     @staticmethod
-    def get_action_from_output_model(dqn_model: DQNModel, model_output) -> np.ndarray:
+    def get_action_from_output_model(dqn_model: DQNModel, model_output, env: Environment) -> np.ndarray:
         if isinstance(dqn_model, DeepQNetwork):
             pass  # TODO: boooh, non so che cosa possa essere
             # return Converter.tf2np(model_output[])
         elif isinstance(dqn_model, NetworkWithOnlyState):
             return Converter.tf2np(model_output)
-        elif isinstance(dqn_model, DQNDiscrete):
+        elif isinstance(dqn_model, DQNDiscreteSoftmax):
             output = np.argmax(Converter.tf2np(model_output))
             return output
+        elif isinstance(dqn_model, DQNDiscrete):
+            if isinstance(env, SinglePendulum):
+                return Converter.tf2np(tf.argmin(model_output, axis=1, name=None).astype(np.float32))
+            elif isinstance(env, DoublePendulum):
+                return np.array([Converter.tf2np(tf.argmin(model_output, axis=1, name=None).astype(np.float32)), 0.])
 
     @staticmethod
-    def prepare_minibatch(dqn_model: DQNModel, minibatch: List[Transition]) -> Tuple[Tensor, Tensor]:
+    def prepare_minibatch(dqn_model: DQNModel, minibatch: List[Transition]) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
         if isinstance(dqn_model, DeepQNetwork):
             pass
-        elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscrete):
+        elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscreteSoftmax) or isinstance(
+                dqn_model, DQNDiscrete):
             np_minibatch = np.array([transition.get_state_vector() for transition in minibatch])
             np_next_minibatch = np.array([transition.get_next_state_vector() for transition in minibatch])
-            return Converter.batch_np2tf(np_minibatch), Converter.batch_np2tf(np_next_minibatch)
+            actions = np.array([transition.action for transition in minibatch])
+            cost = np.array([transition.cost for transition in minibatch])
+            return Converter.batch_np2tf(np_minibatch), Converter.batch_np2tf(cost), \
+                   Converter.batch_np2tf(np_next_minibatch), Converter.batch_np2tf(actions)
 
 
 class DQNModel(ABC):
@@ -98,6 +116,7 @@ class DQNModel(ABC):
     - all the other components (e.g. Trainer) can work with this generic class, knowing that all the property/methods
       of the abstract class have to be implemented.
     """
+
     @property
     @abstractmethod
     def model(self) -> keras.Model:
@@ -191,7 +210,7 @@ class NetworkWithOnlyState(DQNModel):
         return DQNType.STATE
 
 
-class DQNDiscrete(DQNModel):
+class DQNDiscreteSoftmax(DQNModel):
 
     def __init__(self, nx: int, n_discrete_u: int):
         """
@@ -211,6 +230,34 @@ class DQNDiscrete(DQNModel):
         action = keras.layers.Dense(n_discrete_u)(state_out5)
         softmaxed = keras.layers.Softmax()(action)
         self._model = tf.keras.Model(inputs, softmaxed)
+
+    @property
+    def model(self) -> keras.Model:
+        return self._model
+
+    @property
+    def type(self) -> DQNType:
+        return DQNType.DISCRETE_SOFTMAX
+
+
+class DQNDiscrete(DQNModel):
+
+    def __init__(self, nx: int, n_discrete_u: int):
+        """
+        A neural network that, given an input, returns as output n-discrete values, that are the discrete actions of
+        the network.
+
+        :param nx: the number of states
+        :param n_discrete_u: the number of discretization appied on control
+        """
+
+        inputs = keras.layers.Input(shape=(nx))
+        state_out1 = keras.layers.Dense(16, activation="relu")(inputs)
+        state_out2 = keras.layers.Dense(32, activation="relu")(state_out1)
+        state_out3 = keras.layers.Dense(64, activation="relu")(state_out2)
+        state_out4 = keras.layers.Dense(32, activation="relu")(state_out3)
+        action = keras.layers.Dense(n_discrete_u)(state_out4)
+        self._model = tf.keras.Model(inputs, action)
 
     @property
     def model(self) -> keras.Model:

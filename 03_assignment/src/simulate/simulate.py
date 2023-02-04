@@ -18,9 +18,8 @@ class Simulator:
             transition = Transition(state, 0, 0, 0)
             model_input = DQNManager.prepare_input(self.model, transition)
             model_output = self.model.model(model_input, training=False)
-            u = DQNManager.get_action_from_output_model(self.model, model_output)
+            u = DQNManager.get_action_from_output_model(self.model, model_output, self.environment)
             # take the action, get the cost and the next state
-            next_state, cost = self.environment.step(u)
-            converged = cost == -1
+            next_state, cost = self.environment.step(u, state)
             state = next_state
             self.environment.render()

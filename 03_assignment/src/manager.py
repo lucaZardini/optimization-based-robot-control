@@ -4,6 +4,7 @@ from simulate.simulate import Simulator
 from model.model import DQNType, DQNManager, DQNModel
 from model.optimizer import OptimizerType, OptimizerManager
 from train.trainer import Trainer
+from math import pi
 
 import logging
 logger = logging.Logger("manager")
@@ -54,4 +55,4 @@ class Manager:
     def load(self, model_type: DQNType, filename: str):  # TODO
         model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
         simulator = Simulator(model, self.environment)
-        simulator.simulate(np.array([180., 0.]))
+        simulator.simulate(self.environment.setup_state)

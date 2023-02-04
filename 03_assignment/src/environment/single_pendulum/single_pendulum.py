@@ -1,8 +1,10 @@
+from math import pi
 from typing import Optional
 
 from environment.environment import Environment
 from environment.single_pendulum.pendulum_template import Pendulum
 import numpy as np
+from numpy.random import random
 import time
 
 
@@ -42,8 +44,8 @@ class SinglePendulum(Environment):
         return 2
 
     @property
-    def goal(self):  # TODO
-        return [0., 0.]
+    def setup_state(self):
+        return np.array([pi, 0.])
 
     def c2du(self, u):
         u = np.clip(u, -self.uMax + 1e-3, self.uMax - 1e-3)
@@ -110,3 +112,16 @@ class SinglePendulum(Environment):
     #     plt.xlabel("x")
     #     plt.ylabel("u")
     #     plt.show()
+
+    def sample_random_start_episodes(self, episode_length: int) -> list:
+        start_episodes: list = []
+        for i in range(episode_length):
+            if i % 10 == 0:
+                start_episodes.append(np.array([pi, 0]))
+            else:
+                state = random(self.nx)
+                start_episodes.append(state)
+        return start_episodes
+
+    def sample_random_discrete_action(self, start: int, end: int) -> np.ndarray:
+        return np.random.randint(start, end)

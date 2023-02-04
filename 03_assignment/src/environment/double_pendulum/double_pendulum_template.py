@@ -1,3 +1,4 @@
+from math import pi
 from typing import Optional
 
 from environment.double_pendulum.robot_wrapper import RobotWrapper
@@ -6,6 +7,7 @@ from environment.environment import Environment
 from example_robot_data.robots_loader import load
 import numpy as np
 import pinocchio as pin
+from numpy.random import random
 
 
 class DoublePendulum(Environment):
@@ -21,10 +23,11 @@ class DoublePendulum(Environment):
 
     ''' System dynamics '''
 
-    def cost(self) -> np.ndarray:
+    def cost(self) -> np.ndarray:  # TODO: capire come fare il costo
         return np.abs(np.sum(self.dx))
 
     def step(self, u, x=None):
+        u = np.array([self.d2cu(u[0]), 0.])
         nq = self.robot.nq
         nv = self.robot.nv
         model = self.robot.model
@@ -56,6 +59,23 @@ class DoublePendulum(Environment):
     def render(self):
         self.simu.display(self.dx[:self.robot.nq])
 
-    def c2du(self, u):
-        iu = np.clip(u, 0, self.nu - 1) - (self.nu - 1) / 2
-        return iu * 10 / self.nu
+    def d2cu(self, iu):
+        iu = np.clip(iu, 0, self.nu - 1) - (self.nu - 1) / 2
+        return iu * 10/self.nu
+
+    def sample_random_start_episodes(self, episode_length: int) -> list:
+        start_episodes: list = []
+        for i in range(episode_length):
+            if i % 10 == 0:
+                start_episodes.append(np.array([pi, pi, 0., 0.]))
+            else:
+                state = random(self.nx)
+                start_episodes.append(state)
+        return start_episodes
+
+    def sample_random_discrete_action(self, start: int, end: int) -> list:
+        return [np.random.randint(start, end), 0]
+
+    @property
+    def setup_state(self):
+        return np.array([pi, pi, 0., 0.])

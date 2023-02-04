@@ -131,7 +131,7 @@ class RobotSimulator:
 
         self.DISPLAY_T = 0.02  # refresh period for viewer
         self.display_counter = self.DISPLAY_T
-        self.init([pi, 0.], None, True)
+        self.init(np.array([pi, 0.]), None, True)
 
         self.tau_c = np.zeros(na)  # Coulomb friction torque
         self.simulation_type = 'euler'

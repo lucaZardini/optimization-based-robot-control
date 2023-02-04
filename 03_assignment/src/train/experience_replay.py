@@ -30,10 +30,16 @@ class ExperienceReplay:
     def setup(self):
         self.buffer = []
 
+    def save_buffer(self, filename: str):
+        np.save(filename, self.buffer, allow_pickle=True)
+
+    def load_buffer(self, filename: str):
+        self.buffer = np.load(filename, allow_pickle=True)
+
 
 class Transition:
 
-    def __init__(self, state: np.array, action: np.array, cost: int, next_state: np.array):
+    def __init__(self, state: np.array, action: np.array, cost: float, next_state: np.array):
         self.state = state
         self.action = action
         self.cost = cost

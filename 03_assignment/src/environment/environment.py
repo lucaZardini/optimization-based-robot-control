@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from numpy.random import random
+import numpy
 
 
 class Environment(ABC):
@@ -19,15 +19,12 @@ class Environment(ABC):
         pass
 
     @abstractmethod
-    def c2du(self, u):
+    def sample_random_start_episodes(self, episode_length: int) -> list:
         pass
 
-    def sample_random_start_episodes(self, episode_length: int) -> list:
-        start_episodes: list = []
-        for i in range(episode_length):
-            state = random(self.nx)
-            start_episodes.append(state)
-        return start_episodes
+    @abstractmethod
+    def sample_random_discrete_action(self, start: int, end: int) -> numpy.ndarray:
+        pass
 
     @property
     @abstractmethod
@@ -37,4 +34,9 @@ class Environment(ABC):
     @property
     @abstractmethod
     def nu(self) -> int:
+        pass
+
+    @property
+    @abstractmethod
+    def setup_state(self):
         pass
