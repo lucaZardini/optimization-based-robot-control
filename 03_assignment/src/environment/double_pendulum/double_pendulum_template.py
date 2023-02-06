@@ -20,6 +20,7 @@ class DoublePendulum(Environment):
         self.goal = np.concatenate((np.array([0., 0]), np.zeros(self.robot.nv)))
         self.dt = 0.005
         self.dx = np.zeros(2 * self.robot.nv)
+        self.state = np.array([pi, pi])
 
     ''' System dynamics '''
 
@@ -27,19 +28,24 @@ class DoublePendulum(Environment):
         return np.abs(np.sum(self.dx))
 
     def step(self, u, x=None):
+        sumsq = lambda x: np.sum(np.square(x))
+        modulePi = lambda th: (th + np.pi) % (2 * np.pi) - np.pi
+
         u = np.array([self.d2cu(u[0]), 0.])
         nq = self.robot.nq
         nv = self.robot.nv
         model = self.robot.model
         data = self.robot.data
-        q = x[:nq]
+        q = modulePi(x[:nq])
         v = x[nq:]
         ddq = pin.aba(model, data, q, v, u)
         self.dx[nv:] = ddq
         v_mean = v + 0.5 * self.dt * ddq
         self.dx[:nv] = v_mean
         state = x + self.dt * self.dx
-        cost = self.cost()
+        cost = (sumsq(state[:nv]) + 1e-1 * sumsq(self.dx[:nv]) + 1e-3 * sumsq(u)) * 5e-2
+        state[:nq] = modulePi(state[:nq])
+        self.state = np.copy(state)
         return np.copy(state), cost
 
     def reset(self, x: Optional = None):
@@ -54,10 +60,10 @@ class DoublePendulum(Environment):
 
     @property
     def nu(self):
-        return self.robot.na  # control size TODO
+        return 11
 
     def render(self):
-        self.simu.display(self.dx[:self.robot.nq])
+        self.simu.display(self.state[:self.robot.nq])
 
     def d2cu(self, iu):
         iu = np.clip(iu, 0, self.nu - 1) - (self.nu - 1) / 2
@@ -67,7 +73,7 @@ class DoublePendulum(Environment):
         start_episodes: list = []
         for i in range(episode_length):
             if i % 10 == 0:
-                start_episodes.append(np.array([pi, pi, 0., 0.]))
+                start_episodes.append(np.array([pi, 0., 0., 0.]))
             else:
                 state = random(self.nx)
                 start_episodes.append(state)
@@ -78,4 +84,4 @@ class DoublePendulum(Environment):
 
     @property
     def setup_state(self):
-        return np.array([pi, pi, 0., 0.])
+        return np.array([pi, 0., 0., 0.])

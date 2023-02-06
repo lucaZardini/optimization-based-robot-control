@@ -21,5 +21,5 @@ class Simulator:
             u = DQNManager.get_action_from_output_model(self.model, model_output, self.environment)
             # take the action, get the cost and the next state
             next_state, cost = self.environment.step(u, state)
-            state = next_state
+            state = np.copy(next_state)
             self.environment.render()

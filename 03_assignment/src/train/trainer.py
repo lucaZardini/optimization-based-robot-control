@@ -79,8 +79,8 @@ class Trainer:
         for number_episode, start_episode in enumerate(start_episodes):
             logger.info(f"Running episode [{number_episode}]")
             if number_episode % 30 == 0:
-                self.critic.save_weights(f"min_weights_episode_{number_episode}.h5")
-                self.experience_replay.save_buffer("batch_transitions.npy")
+                self.critic.save_weights(f"double_min_weights_episode_{number_episode}.h5")
+                self.experience_replay.save_buffer("double_batch_transitions.npy")
             self.env.reset(start_episode)
             # self.experience_replay.setup()
 
@@ -114,7 +114,7 @@ class Trainer:
                     # sample random minibatch from experience replay
                     # get the cost and call the update function
                     minibatch = self.experience_replay.sample_random_minibatch()
-                    minibatch, minibatch_cost, next_minibatch, actions = DQNManager.prepare_minibatch(self.critic, minibatch)
+                    minibatch, minibatch_cost, next_minibatch, actions = DQNManager.prepare_minibatch(self.critic, minibatch, self.env)
                     self.update(minibatch, minibatch_cost, next_minibatch, actions)
 
                 state = np.copy(next_state)
@@ -163,7 +163,7 @@ class Trainer:
             Q_value = self.critic.model(xu_batch, training=True)          # Critic's loss function. tf.math.reduce_mean() computes the mean of elements across dimensions of a tensor
             u_batch_indexed = []
             for i in range(len(actions)):
-                u_batch_indexed.append([i, int(actions[i])]) # TODO: adjust actions array that now contains more than one action (the second is always = 0)
+                u_batch_indexed.append([i, int(actions[i])])
             u_batch_indexed = tf.stack(u_batch_indexed)
             Q_value = tf.gather_nd(Q_value, u_batch_indexed)
             Q_loss = tf.math.reduce_mean(tf.math.square(y - Q_value))

@@ -94,14 +94,19 @@ class DQNManager:
                 return np.array([Converter.tf2np(tf.argmin(model_output, axis=1, name=None).astype(np.float32)), 0.])
 
     @staticmethod
-    def prepare_minibatch(dqn_model: DQNModel, minibatch: List[Transition]) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
+    def prepare_minibatch(dqn_model: DQNModel, minibatch: List[Transition], env: Environment) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
         if isinstance(dqn_model, DeepQNetwork):
             pass
         elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscreteSoftmax) or isinstance(
                 dqn_model, DQNDiscrete):
             np_minibatch = np.array([transition.get_state_vector() for transition in minibatch])
             np_next_minibatch = np.array([transition.get_next_state_vector() for transition in minibatch])
-            actions = np.array([transition.action for transition in minibatch])
+            if isinstance(env, SinglePendulum):
+                actions = np.array([transition.action for transition in minibatch])
+            elif isinstance(env, DoublePendulum):
+                actions = np.array([transition.action[0] for transition in minibatch])
+            else:
+                raise ValueError(f"No preparation of action env for environment {env}")
             cost = np.array([transition.cost for transition in minibatch])
             return Converter.batch_np2tf(np_minibatch), Converter.batch_np2tf(cost), \
                    Converter.batch_np2tf(np_next_minibatch), Converter.batch_np2tf(actions)
