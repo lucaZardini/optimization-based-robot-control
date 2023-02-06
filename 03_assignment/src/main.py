@@ -24,7 +24,7 @@ class DefaultValues:
 if __name__ == "__main__":
     arg_parser = argparse.ArgumentParser(description="Reinforcement learning")
     arg_parser.add_argument("--model", type=str, required=False, default=DefaultValues.DQN, help="The model to train or to lead")
-    arg_parser.add_argument("--train", type=bool, default=False, required=False, help="Train or lead a pretrained model. If you want to load a pretrained model, the path is required")
+    arg_parser.add_argument("--train", type=bool, default=True, required=False, help="Train or lead a pretrained model. If you want to load a pretrained model, the path is required")
     arg_parser.add_argument("--weight-path", type=str, required=True, help="The path to the weights of the pretrained model, or where to store the model")
     arg_parser.add_argument("--optimizer", type=str, required=False, help="Optimizer used to train the model, default is adam", default="adam")
     arg_parser.add_argument("--env", type=str, required=False, default=DefaultValues.ENV, help="The environment to train/load the model")
@@ -55,6 +55,6 @@ if __name__ == "__main__":
                       args.experience_to_learn)
 
     if args.train:
-        manager.train(args.weight_path)
+        manager.train(args.weight_path) # to train
     else:
-        manager.load(model_type, args.weight_path)
+        manager.load(model_type, args.weight_path) # to simulate

@@ -143,21 +143,21 @@ class Pendulum:
         sumsq = lambda x: np.sum(np.square(x))
 
         cost = 0.0
-        q = modulePi(x[:self.nq])
+        q = modulePi(x[:self.nq]) # parametrize q between -pi and pi
         v = x[self.nq:]
-        u = np.clip(np.reshape(np.array(u), self.nu), -self.umax, self.umax)
+        u = np.clip(np.reshape(np.array(u), self.nu), -self.umax, self.umax) # limit u between -umax and umax
 
         DT = self.DT / self.NDT
         for i in range(self.NDT):
-            pin.computeAllTerms(self.model, self.data, q, v)
+            pin.computeAllTerms(self.model, self.data, q, v) # do forward kinematics
             M = self.data.M
             b = self.data.nle
-            a = inv(M) * (u - self.Kf * v - b)
+            a = inv(M) * (u - self.Kf * v - b) # acceleration
             a = a.reshape(self.nv) + np.random.randn(self.nv) * self.noise_stddev
             self.a = a
 
-            q += (v + 0.5 * DT * a) * DT
-            v += a * DT
+            q += (v + 0.5 * DT * a) * DT # compute q given the acceleration
+            v += a * DT # compute v given the acceleration
             cost += (sumsq(q) + 1e-1 * sumsq(v) + 1e-3 * sumsq(u)) * DT  # cost function
 
             if display:
@@ -165,11 +165,11 @@ class Pendulum:
                 time.sleep(1e-4)
 
         x[:self.nq] = modulePi(q)
-        x[self.nq:] = np.clip(v, -self.vmax, self.vmax)
+        x[self.nq:] = np.clip(v, -self.vmax, self.vmax) # limit velocity between -vmax and vmax
 
         return x, cost
 
-    def render(self):  # TODO: this function basically show the system
+    def render(self):  # TODO: this function basically show the system in Gepetto graphic interface
         q = self.x[:self.nq]
         self.display(q)
         time.sleep(self.DT / 10)

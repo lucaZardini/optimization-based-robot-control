@@ -68,7 +68,7 @@ class Trainer:
         - the experience replay size
         """
 
-        start_episodes = self.env.sample_random_start_episodes(self.episodes)
+        start_episodes = self.env.sample_random_start_episodes(self.episodes) # create random initial samples depending on the chosen environment: different for single pendulum and double pendulum
         logger.info(f"Sampled the starting episodes. The length is [{len(start_episodes)}]")
         # Initialize critic already done
         # Initialize target
@@ -78,9 +78,12 @@ class Trainer:
         total_steps = 0
         for number_episode, start_episode in enumerate(start_episodes):
             logger.info(f"Running episode [{number_episode}]")
-            if number_episode % 30 == 0:
-                self.critic.save_weights(f"double_min_weights_episode_{number_episode}.h5")
-                self.experience_replay.save_buffer("double_batch_transitions.npy")
+            if number_episode % 30 == 0: # save the weights every 30 episodes
+                self.critic.save_weights(f"double_weight_cost_{number_episode}.h5")
+                self.experience_replay.save_buffer("double_weight_cost_batch_transitions.npy") # save replay buffer: transition parameters
+
+            # ALGORITHM
+            # Tell the pendulum to start in start_episode, i.e. the random initial episode
             self.env.reset(start_episode)
             # self.experience_replay.setup()
 
@@ -88,7 +91,7 @@ class Trainer:
             epsilon = self.epsilon_start
             u = np.random.random()  # first action  TODO: se vuoi, fai in modo che azione randomica sia basata su env.
             state = start_episode
-            transition = Transition(state, u, 0, 0)
+            transition = Transition(state, u, 0, 0) # Transition: class defined in file "experience_replay"
             for iteration in range(self.max_iterations):
                 if iteration % 100 == 0:
                     logger.info(f"Running iteration [{iteration}]")
@@ -97,7 +100,7 @@ class Trainer:
                 epsilon = max(epsilon, self.epsilon_min)
                 # choose next action using epsilon greedy policy
                 
-                u = self._get_action(epsilon, transition)
+                u = self._get_action(epsilon, transition) # _get_action: function inside file "trainer"; used to choose a random action or an action that follows the model
 
                 # take the action, get the cost and the next state
                 next_state, cost = self.env.step(u, state)
@@ -105,7 +108,7 @@ class Trainer:
                 converged = cost == 0.0
                 # save the transition in the experience replay buffer  # transition can be a class
                 transition = Transition(state, u, cost, next_state)
-                self.experience_replay.append(transition)
+                self.experience_replay.append(transition) # save transition object
 
                 # if self.experience_replay.size - 1 == self.experience_to_learn:
                 #     logger.info("We have enough experience to train the model")
@@ -118,7 +121,7 @@ class Trainer:
                     self.update(minibatch, minibatch_cost, next_minibatch, actions)
 
                 state = np.copy(next_state)
-                if total_steps % self.update_target_params == 0:
+                if total_steps % self.update_target_params == 0: # every update_target_params the weight of the critic network are saved inside the target network
                     self.target.initialize_weights(self.critic)
 
                 if converged:
@@ -134,7 +137,7 @@ class Trainer:
         else:
             # logger.info("Chose model action")
             model_input = DQNManager.prepare_input(self.critic, transition)
-            model_output = self.critic.model(model_input, training=False)
+            model_output = self.critic.model(model_input, training=False) # tensorflow array of 11 elements
             u = DQNManager.get_action_from_output_model(self.critic, model_output, self.env)  # size of u
         return u
     

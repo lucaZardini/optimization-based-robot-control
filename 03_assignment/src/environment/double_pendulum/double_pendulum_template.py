@@ -31,19 +31,19 @@ class DoublePendulum(Environment):
         sumsq = lambda x: np.sum(np.square(x))
         modulePi = lambda th: (th + np.pi) % (2 * np.pi) - np.pi
 
-        u = np.array([self.d2cu(u[0]), 0.])
+        u = np.array([self.d2cu(u[0]), 0.]) # 0 to underactuate the 2nd joint
         nq = self.robot.nq
         nv = self.robot.nv
         model = self.robot.model
         data = self.robot.data
         q = modulePi(x[:nq])
         v = x[nq:]
-        ddq = pin.aba(model, data, q, v, u)
+        ddq = pin.aba(model, data, q, v, u) # forward dynamics that outputs the acceleration
         self.dx[nv:] = ddq
-        v_mean = v + 0.5 * self.dt * ddq
+        v_mean = v + self.dt * ddq
         self.dx[:nv] = v_mean
         state = x + self.dt * self.dx
-        cost = (sumsq(state[:nv]) + 1e-1 * sumsq(self.dx[:nv]) + 1e-3 * sumsq(u)) * 5e-2
+        cost = (10 * sumsq(state[0]) + 3 * sumsq(state[1]) + 1e-3 * sumsq(self.dx[:nv]) + 1e-6 * sumsq(u)) * 5e-2
         state[:nq] = modulePi(state[:nq])
         self.state = np.copy(state)
         return np.copy(state), cost

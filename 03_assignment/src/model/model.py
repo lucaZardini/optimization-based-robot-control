@@ -70,7 +70,7 @@ class DQNManager:
         return model
 
     @staticmethod
-    def prepare_input(dqn_model: DQNModel, transition: Transition) -> EagerTensor:
+    def prepare_input(dqn_model: DQNModel, transition: Transition) -> EagerTensor: # convert the input (i.e. variable "state" from numpy type to tensorfloe type)
         if isinstance(dqn_model, DeepQNetwork):
             return Converter.np2tf(transition.get_state_and_control_vector())
         elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscreteSoftmax) or isinstance(
@@ -78,7 +78,7 @@ class DQNManager:
             return Converter.np2tf(transition.get_state_vector())
 
     @staticmethod
-    def get_action_from_output_model(dqn_model: DQNModel, model_output, env: Environment) -> np.ndarray:
+    def get_action_from_output_model(dqn_model: DQNModel, model_output, env: Environment) -> np.ndarray: # pass the index where there is the best action
         if isinstance(dqn_model, DeepQNetwork):
             pass  # TODO: boooh, non so che cosa possa essere
             # return Converter.tf2np(model_output[])
@@ -91,10 +91,10 @@ class DQNManager:
             if isinstance(env, SinglePendulum):
                 return Converter.tf2np(tf.argmin(model_output, axis=1, name=None).astype(np.float32))
             elif isinstance(env, DoublePendulum):
-                return np.array([Converter.tf2np(tf.argmin(model_output, axis=1, name=None).astype(np.float32)), 0.])
+                return np.array([Converter.tf2np(tf.argmin(model_output, axis=1, name=None).astype(np.float32)), 0.]) # 0 for underactuated joint
 
     @staticmethod
-    def prepare_minibatch(dqn_model: DQNModel, minibatch: List[Transition], env: Environment) -> Tuple[Tensor, Tensor, Tensor, Tensor]:
+    def prepare_minibatch(dqn_model: DQNModel, minibatch: List[Transition], env: Environment) -> Tuple[Tensor, Tensor, Tensor, Tensor]: # convert the minibatch from numpy type to tensorflow type
         if isinstance(dqn_model, DeepQNetwork):
             pass
         elif isinstance(dqn_model, NetworkWithOnlyState) or isinstance(dqn_model, DQNDiscreteSoftmax) or isinstance(
@@ -104,7 +104,7 @@ class DQNManager:
             if isinstance(env, SinglePendulum):
                 actions = np.array([transition.action for transition in minibatch])
             elif isinstance(env, DoublePendulum):
-                actions = np.array([transition.action[0] for transition in minibatch])
+                actions = np.array([transition.action[0] for transition in minibatch]) # for double-pendulum it takes the action only for 1st joint
             else:
                 raise ValueError(f"No preparation of action env for environment {env}")
             cost = np.array([transition.cost for transition in minibatch])

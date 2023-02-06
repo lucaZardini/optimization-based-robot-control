@@ -63,7 +63,7 @@ class SinglePendulum(Environment):
             self.x = np.copy(x)
         return self.x
 
-    def step(self, u,  x=None):
+    def step(self, u,  x=None): # convert the state from discrete to continuous
         u = self.d2cu(u)
         self.x, cost = self.pendulum.dynamics(self.x, u)
         return np.copy(self.x), cost
