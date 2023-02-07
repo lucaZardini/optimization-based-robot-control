@@ -1,5 +1,8 @@
 from __future__ import absolute_import, annotations
 
+import time
+
+from common.converter import Converter
 from numpy.random import uniform
 
 import numpy as np
@@ -73,15 +76,24 @@ class Trainer:
         # Initialize critic already done
         # Initialize target
         self.target.initialize_weights(self.critic)
-
+        parameters = {
+            'discount_factor': self.discount,
+            'episodes': self.episodes,
+            'iterations': self.max_iterations,
+            'cost_to_go': {},
+            'loss': [],
+            'time': []
+        }
         # Initialize the environment
         total_steps = 0
         for number_episode, start_episode in enumerate(start_episodes):
+            parameters['cost_to_go'][number_episode] = []
             logger.info(f"Running episode [{number_episode}]")
-            if number_episode % 30 == 0: # save the weights every 30 episodes
-                self.critic.save_weights(f"double_weight_cost_{number_episode}.h5")
-                self.experience_replay.save_buffer("double_weight_cost_batch_transitions.npy") # save replay buffer: transition parameters
+            if number_episode % 10 == 0:  # save the weights every 30 episodes
+                self.critic.save_weights(f"weight_cost_{number_episode}.h5")
+                self.experience_replay.save_buffer("weight_cost_batch_transitions.npy")  # save replay buffer: transition parameters
 
+            start_episode_time = time.time()
             # ALGORITHM
             # Tell the pendulum to start in start_episode, i.e. the random initial episode
             self.env.reset(start_episode)
@@ -104,6 +116,8 @@ class Trainer:
 
                 # take the action, get the cost and the next state
                 next_state, cost = self.env.step(u, state)
+
+                parameters['cost_to_go'][number_episode].append(cost)
                 # self.env.render()
                 converged = cost == 0.0
                 # save the transition in the experience replay buffer  # transition can be a class
@@ -118,7 +132,9 @@ class Trainer:
                     # get the cost and call the update function
                     minibatch = self.experience_replay.sample_random_minibatch()
                     minibatch, minibatch_cost, next_minibatch, actions = DQNManager.prepare_minibatch(self.critic, minibatch, self.env)
-                    self.update(minibatch, minibatch_cost, next_minibatch, actions)
+                    loss = self.update(minibatch, minibatch_cost, next_minibatch, actions)
+                    np_loss = Converter.tf2np(loss)
+                    parameters['loss'].append(np_loss)
 
                 state = np.copy(next_state)
                 if total_steps % self.update_target_params == 0: # every update_target_params the weight of the critic network are saved inside the target network
@@ -128,7 +144,9 @@ class Trainer:
                     self.critic.save_weights(filename+str(total_steps)+".h5")
                     break
 
+            parameters['time'].append(time.time() - start_episode_time)
         self.critic.save_weights(filename)
+        return parameters
         
     def _get_action(self, epsilon, transition) -> np.ndarray:
         if uniform() < epsilon:
@@ -175,3 +193,4 @@ class Trainer:
         # Update the critic backpropagating the gradients
         self.optimizer.apply_gradients(zip(Q_grad, self.critic.model.trainable_variables))
         # logger.info("Model parameters updated")
+        return Q_loss
