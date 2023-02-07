@@ -26,6 +26,10 @@ class Environment(ABC):
     def sample_random_discrete_action(self, start: int, end: int) -> numpy.ndarray:
         pass
 
+    @abstractmethod
+    def d2cu(self, u):
+        pass
+
     @property
     @abstractmethod
     def nx(self) -> int:
