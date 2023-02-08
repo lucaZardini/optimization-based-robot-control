@@ -22,8 +22,8 @@ class Manager:
     def __init__(self, discount: float, learning_rate: int, optimizer_type: OptimizerType, critic_type: DQNType,
                  target_type: DQNType, env_type: EnvironmentType, batch_size: int, update_target_params: int,
                  epsilon_start: float, epsilon_decay: float, epsilon_min: float, buffer_size: int,
-                 max_iterations: int, episodes: int, experience_to_learn: int, update_critic: int, plot_charts: bool = True,
-                 save_params: bool = True):
+                 max_iterations: int, episodes: int, experience_to_learn: int, update_critic: int,
+                 max_iterations_eval: int, plot_charts: bool = True, save_params: bool = True):
         """
         This class is the entry point of the project. It dispatches every possible functionality implemented.
 
@@ -48,7 +48,7 @@ class Manager:
         self.target = DQNManager.get_model(target_type, self.environment.nx, self.environment.nu)
         self.optimizer_manager = OptimizerManager(qvalue_learning_rate=learning_rate)
         self.optimizer = self.optimizer_manager.get_optimizer(optimizer_type)
-        self.evaluator = Evaluator(self.environment, max_iterations)
+        self.evaluator = Evaluator(self.environment, max_iterations_eval)
         self.trainer = Trainer(self.critic, self.target, self.optimizer, self.environment, discount, batch_size,
                                update_target_params, epsilon_start, epsilon_decay, epsilon_min, buffer_size,
                                max_iterations, episodes, experience_to_learn, update_critic, self.evaluator)
@@ -97,7 +97,7 @@ class Manager:
 
     def load(self, model_type: DQNType, filename: str):
         model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
-        state_history, action_history, total_time, cost = self.evaluator.evaluate(model, self.environment.setup_state)
+        state_history, action_history, total_time, cost = self.evaluator.evaluate(model, self.environment.sample_random_start_episodes(1)[0])
         if self.plot_charts:
             self.plot(state_history, action_history, total_time)
 
