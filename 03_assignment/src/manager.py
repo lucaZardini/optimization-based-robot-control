@@ -97,7 +97,7 @@ class Manager:
 
     def load(self, model_type: DQNType, filename: str):
         model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
-        state_history, action_history, total_time = self.evaluator.evaluate(model, self.environment.setup_state)
+        state_history, action_history, total_time, cost = self.evaluator.evaluate(model, self.environment.setup_state)
         if self.plot_charts:
             self.plot(state_history, action_history, total_time)
 
