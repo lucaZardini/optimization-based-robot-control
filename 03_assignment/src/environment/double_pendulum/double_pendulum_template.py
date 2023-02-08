@@ -7,7 +7,7 @@ from environment.environment import Environment
 from example_robot_data.robots_loader import load
 import numpy as np
 import pinocchio as pin
-from numpy.random import random
+from numpy import random
 
 
 class DoublePendulum(Environment):
@@ -43,7 +43,8 @@ class DoublePendulum(Environment):
         v_mean = v + self.dt * ddq
         self.dx[:nv] = v_mean
         state = x + self.dt * self.dx
-        cost = (10 * sumsq(state[0]) + 3 * sumsq(state[1]) + 1e-3 * sumsq(self.dx[:nv]) + 1e-6 * sumsq(u)) * 5e-2
+        cost = (sumsq(state[:nq]) + 1e-1 * sumsq(state[nq:]) + 1e-3 * sumsq(u))
+        state[nq:] = np.clip(state[nq:], -8, 8)
         state[:nq] = modulePi(state[:nq])
         self.state = np.copy(state)
         return np.copy(state), cost
@@ -60,14 +61,14 @@ class DoublePendulum(Environment):
 
     @property
     def nu(self):
-        return 11
+        return 33
 
     def render(self):
         self.simu.display(self.state[:self.robot.nq])
 
     def d2cu(self, iu):
         iu = np.clip(iu, 0, self.nu - 1) - (self.nu - 1) / 2
-        return iu * 10/self.nu
+        return iu * 20/self.nu
 
     def sample_random_start_episodes(self, episode_length: int) -> list:
         start_episodes: list = []
@@ -75,7 +76,9 @@ class DoublePendulum(Environment):
             if i % 10 == 0:
                 start_episodes.append(np.array([pi, 0., 0., 0.]))
             else:
-                state = random(self.nx)
+                joint_angles = random.uniform(low=-pi, high=pi, size=2)
+                joint_velocities = random.uniform(low=-16, high=16, size=2)
+                state = np.array([joint_angles[0], joint_angles[1], joint_velocities[0], joint_velocities[1]])
                 start_episodes.append(state)
         return start_episodes
 
