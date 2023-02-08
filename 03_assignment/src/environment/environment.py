@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, List
 
 import numpy
 
@@ -43,4 +43,8 @@ class Environment(ABC):
     @property
     @abstractmethod
     def setup_state(self):
+        pass
+
+    @staticmethod
+    def fixed_episodes_to_evaluate_model() -> List[numpy.ndarray]:
         pass

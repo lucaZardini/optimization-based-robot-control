@@ -3,6 +3,7 @@ from __future__ import absolute_import, annotations
 import time
 
 from common.converter import Converter
+from evaluate.evaluate import Evaluator
 from numpy.random import uniform
 
 import numpy as np
@@ -21,7 +22,8 @@ class Trainer:
 
     def __init__(self, critic: DQNModel, target: DQNModel, optimizer: KerasOptimizer, environment: Environment,
                  discount: float, batch_size: int, update_target_params: int, epsilon_start: float, epsilon_decay: float,
-                 epsilon_min: float, buffer_size: int, max_iterations: int, episodes: int, experience_to_learn: int):
+                 epsilon_min: float, buffer_size: int, max_iterations: int, episodes: int, experience_to_learn: int,
+                 update_critic: int, evaluator: Evaluator):
         """
         This class perform the training of a neural network.
 
@@ -55,6 +57,8 @@ class Trainer:
         self.max_iterations = max_iterations
         self.episodes = episodes
         self.experience_to_learn = experience_to_learn
+        self.update_critic = update_critic
+        self.evaluator = evaluator
 
     def train(self, filename: str):
         """
@@ -82,15 +86,23 @@ class Trainer:
             'iterations': self.max_iterations,
             'cost_to_go': {},
             'loss': [],
-            'time': []
+            'time': [],
+            'episode_best_model': 0,
+            'cost_best_model': 0
         }
         # Initialize the environment
         total_steps = 0
+        best_model = None
+        best_model_cost = None
+        total_evaluate_time = []
+        epsilon = self.epsilon_start
+        best_model_episode = None
+
         for number_episode, start_episode in enumerate(start_episodes):
             parameters['cost_to_go'][number_episode] = []
             logger.info(f"Running episode [{number_episode}]")
-            if number_episode % 10 == 0:  # save the weights every 30 episodes
-                self.critic.save_weights(f"weight_cost_{number_episode}.h5")
+            if number_episode % 10 == 0 and best_model is not None:  # save the weights every 30 episodes
+                best_model.save_weights(f"weight_models/single_pendulum/best_model_so_far.h5")
                 self.experience_replay.save_buffer("weight_cost_batch_transitions.npy")  # save replay buffer: transition parameters
 
             start_episode_time = time.time()
@@ -98,9 +110,6 @@ class Trainer:
             # Tell the pendulum to start in start_episode, i.e. the random initial episode
             self.env.reset(start_episode)
             # self.experience_replay.setup()
-
-            # sample new epsilon
-            epsilon = self.epsilon_start
             u = np.random.random()  # first action  TODO: se vuoi, fai in modo che azione randomica sia basata su env.
             state = start_episode
             transition = Transition(state, u, 0, 0) # Transition: class defined in file "experience_replay"
@@ -130,11 +139,12 @@ class Trainer:
                 if self.experience_replay.size > self.experience_to_learn:
                     # sample random minibatch from experience replay
                     # get the cost and call the update function
-                    minibatch = self.experience_replay.sample_random_minibatch()
-                    minibatch, minibatch_cost, next_minibatch, actions = DQNManager.prepare_minibatch(self.critic, minibatch, self.env)
-                    loss = self.update(minibatch, minibatch_cost, next_minibatch, actions)
-                    np_loss = Converter.tf2np(loss)
-                    parameters['loss'].append(np_loss)
+                    if total_steps % self.update_critic == 0:
+                        minibatch = self.experience_replay.sample_random_minibatch()
+                        minibatch, minibatch_cost, next_minibatch, actions = DQNManager.prepare_minibatch(self.critic, minibatch, self.env)
+                        loss = self.update(minibatch, minibatch_cost, next_minibatch, actions)
+                        np_loss = Converter.tf2np(loss)
+                        parameters['loss'].append(np_loss)
 
                 state = np.copy(next_state)
                 if total_steps % self.update_target_params == 0: # every update_target_params the weight of the critic network are saved inside the target network
@@ -145,8 +155,17 @@ class Trainer:
                     break
 
             parameters['time'].append(time.time() - start_episode_time)
-        self.critic.save_weights(filename)
-        return parameters
+            model_cost, evaluate_time = self.evaluator.eval_to_get_best_model(self.critic)
+            total_evaluate_time.append(evaluate_time)
+            if best_model is None or model_cost < best_model_cost:
+                best_model = self.critic.model
+                best_model_cost = model_cost
+                best_model_episode = number_episode
+        parameters['eval_time'] = total_evaluate_time
+        parameters['episode_best_model'] = best_model_episode
+        parameters['cost_best_model'] = best_model_cost
+        best_model.save_weights(f'weight_models/single_pendulum/best_model.h5')
+        return best_model, parameters
         
     def _get_action(self, epsilon, transition) -> np.ndarray:
         if uniform() < epsilon:

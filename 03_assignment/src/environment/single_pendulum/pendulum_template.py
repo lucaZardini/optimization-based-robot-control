@@ -145,7 +145,6 @@ class Pendulum:
         cost = 0.0
         q = modulePi(x[:self.nq]) # parametrize q between -pi and pi
         v = x[self.nq:]
-        u = np.clip(np.reshape(np.array(u), self.nu), -self.umax, self.umax) # limit u between -umax and umax
 
         DT = self.DT / self.NDT
         for i in range(self.NDT):
@@ -158,7 +157,7 @@ class Pendulum:
 
             q += (v + 0.5 * DT * a) * DT # compute q given the acceleration
             v += a * DT # compute v given the acceleration
-            cost += (sumsq(q) + 1e-1 * sumsq(v) + 1e-3 * sumsq(u)) * DT  # cost function
+            cost += (sumsq(q) + 1e-1 * sumsq(v) + 1e-3 * sumsq(u))  # cost function
 
             if display:
                 self.display(q)

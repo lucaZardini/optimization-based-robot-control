@@ -1,10 +1,10 @@
 from math import pi
-from typing import Optional
+from typing import Optional, List
 
 from environment.environment import Environment
 from environment.single_pendulum.pendulum_template import Pendulum
 import numpy as np
-from numpy.random import random
+from numpy import random
 import time
 
 
@@ -119,9 +119,23 @@ class SinglePendulum(Environment):
             if i % 10 == 0:
                 start_episodes.append(np.array([pi, 0]))
             else:
-                state = random(self.nx)
+                joint_angle = random.uniform(low=-pi, high=pi, size=1)
+                joint_velocity = random.uniform(low=-self.pendulum.vmax, high=self.pendulum.vmax, size=1)
+                state = np.array([joint_angle[0], joint_velocity[0]])
                 start_episodes.append(state)
         return start_episodes
 
     def sample_random_discrete_action(self, start: int, end: int) -> np.ndarray:
         return np.random.randint(start, end)
+
+    @staticmethod
+    def fixed_episodes_to_evaluate_model() -> List[np.ndarray]:
+        return [
+            np.array([pi, 0]),
+            np.array([pi/2, 0]),
+            np.array([-pi/2, 0]),
+            np.array([-pi/4, 0.5]),
+            np.array([pi/4, +0.5]),
+            np.array([pi*3/4, 1]),
+            np.array([-pi*3/4, -1])
+        ]

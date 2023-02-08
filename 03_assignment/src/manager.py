@@ -4,7 +4,7 @@ import datetime
 import time
 import numpy as np
 from environment.environment_type import EnvironmentType, EnvironmentManager
-from simulate.simulate import Simulator
+from evaluate.evaluate import Evaluator
 from model.model import DQNType, DQNManager
 from model.optimizer import OptimizerType, OptimizerManager
 from train.trainer import Trainer
@@ -22,7 +22,7 @@ class Manager:
     def __init__(self, discount: float, learning_rate: int, optimizer_type: OptimizerType, critic_type: DQNType,
                  target_type: DQNType, env_type: EnvironmentType, batch_size: int, update_target_params: int,
                  epsilon_start: float, epsilon_decay: float, epsilon_min: float, buffer_size: int,
-                 max_iterations: int, episodes: int, experience_to_learn: int, plot_charts: bool = True,
+                 max_iterations: int, episodes: int, experience_to_learn: int, update_critic: int, plot_charts: bool = True,
                  save_params: bool = True):
         """
         This class is the entry point of the project. It dispatches every possible functionality implemented.
@@ -48,9 +48,10 @@ class Manager:
         self.target = DQNManager.get_model(target_type, self.environment.nx, self.environment.nu)
         self.optimizer_manager = OptimizerManager(qvalue_learning_rate=learning_rate)
         self.optimizer = self.optimizer_manager.get_optimizer(optimizer_type)
+        self.evaluator = Evaluator(self.environment, max_iterations)
         self.trainer = Trainer(self.critic, self.target, self.optimizer, self.environment, discount, batch_size,
                                update_target_params, epsilon_start, epsilon_decay, epsilon_min, buffer_size,
-                               max_iterations, episodes, experience_to_learn)
+                               max_iterations, episodes, experience_to_learn, update_critic, self.evaluator)
         self.plot_charts = plot_charts
         self.save_params = save_params
 
@@ -59,7 +60,7 @@ class Manager:
         Perform the training procedure of the models.
         """
         logger.info(f"Starting to train the model [{self.critic.type.value}] and store the weights in [{filename}]")
-        parameters = self.trainer.train(filename)
+        best_model, parameters = self.trainer.train(filename)
         if self.save_params:
             np.save("weight_models/single_pendulum/parameters.npy", parameters, allow_pickle=True)
         training_time = sum([time_episode for time_episode in parameters['time']])
@@ -96,8 +97,7 @@ class Manager:
 
     def load(self, model_type: DQNType, filename: str):
         model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
-        simulator = Simulator(model, self.environment)
-        state_history, action_history, total_time = simulator.simulate(self.environment.setup_state)
+        state_history, action_history, total_time = self.evaluator.evaluate(model, self.environment.setup_state)
         if self.plot_charts:
             self.plot(state_history, action_history, total_time)
 
