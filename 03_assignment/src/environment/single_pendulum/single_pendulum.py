@@ -16,7 +16,7 @@ class SinglePendulum(Environment):
     Cost is -1 if the goal state has been reached, zero otherwise.
     '''
 
-    def __init__(self, nq=51, nv=21, nu=11, vMax=5, uMax=5, dt=0.2, ndt=1, noise_stddev=0):
+    def __init__(self, nq=51, nv=21, nu=11, vMax=5, uMax=2, dt=0.2, ndt=1, noise_stddev=0):
         """
         :param nq: the number of points joint angles
         :param nv: the number of points joint velocities
@@ -116,7 +116,7 @@ class SinglePendulum(Environment):
     def sample_random_start_episodes(self, episode_length: int) -> list:
         start_episodes: list = []
         for i in range(episode_length):
-            if i % 10 == 0:
+            if i % 10 != 0:
                 start_episodes.append(np.array([pi, 0]))
             else:
                 joint_angle = random.uniform(low=-pi, high=pi, size=1)
