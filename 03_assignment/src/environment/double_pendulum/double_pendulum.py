@@ -93,3 +93,7 @@ class DoublePendulum(Environment):
             np.array([pi/2, -pi/2, 0.5, 0.5]),
             np.array([pi/2, -pi/2, -0.5, 0.5])
         ]
+
+    @staticmethod
+    def weight_path() -> str:
+        return "weight_models/double_pendulum/"

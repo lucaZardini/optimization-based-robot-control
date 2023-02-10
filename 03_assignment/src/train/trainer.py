@@ -156,13 +156,13 @@ class Trainer:
                 best_model = self.critic.model
                 best_model_cost = model_cost
                 best_model_episode = number_episode
-                best_model.save_weights(f"weight_models/double_pendulum/forse_vai/best_model?.h5")
-                self.experience_replay.save_buffer("weight_models/double_pendulum/forse_vai/parameters?.npy")  # save replay buffer: transition parameters
+                best_model.save_weights(f"{self.env.weight_path()}best_model_so_far_{filename}")
+                self.experience_replay.save_buffer(f"{self.env.weight_path()}parameters.npy")  # save replay buffer: transition parameters
 
         parameters['eval_time'] = total_evaluate_time
         parameters['episode_best_model'] = best_model_episode
         parameters['cost_best_model'] = best_model_cost
-        best_model.save_weights(f"{filename}.h5")
+        best_model.save_weights(f"{self.env.weight_path()}{filename}")
         return best_model, parameters
         
     def _get_action(self, epsilon, transition) -> np.ndarray:

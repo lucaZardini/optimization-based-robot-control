@@ -94,3 +94,7 @@ class SinglePendulum(Environment):
             np.array([pi*3/4, 1]),
             np.array([-pi*3/4, -1])
         ]
+
+    @staticmethod
+    def weight_path() -> str:
+        return "weight_models/single_pendulum/"

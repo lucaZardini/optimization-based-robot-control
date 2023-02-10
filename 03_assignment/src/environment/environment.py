@@ -90,3 +90,10 @@ class Environment(ABC):
         :return: list of fixed episodes.
         """
         pass
+
+    @staticmethod
+    def weight_path() -> str:
+        """
+        Return the path to save the weights.
+        """
+        pass
