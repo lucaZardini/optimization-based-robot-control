@@ -64,7 +64,7 @@ class Manager:
         logger.info(f"Starting to train the model [{self.critic.type.value}] and store the weights in [{filename}]")
         best_model, parameters = self.trainer.train(filename)
         if self.save_params:
-            np.save("weight_models/single_pendulum/parameters_u_bll.npy", parameters, allow_pickle=True)
+            np.save(f"{self.environment.weight_path()}params.npy", parameters, allow_pickle=True)
         training_time = sum([time_episode for time_episode in parameters['time']])
         print(f"Total training time: {str(datetime.timedelta(seconds=training_time))}")
         cost_to_go = parameters['cost_to_go']
@@ -111,12 +111,13 @@ class Manager:
         :param filename: the filename
         """
         model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
-        self.evaluator.evaluate(model, np.array([math.pi, 0, 0, 0]))
         random_episodes = self.environment.sample_random_start_episodes(10)
-        for random_episode in random_episodes:
-            state_history, action_history, total_time, cost = self.evaluator.evaluate(model, random_episode)
-        # if self.plot_charts:
-        #     self.plot(state_history, action_history, total_time)
+        # for random_episode in random_episodes:
+        #     state_history, action_history, total_time, cost = self.evaluator.evaluate(model, random_episode)
+        random_episode = self.environment.sample_random_start_episodes(1)[0]
+        state_history, action_history, total_time, cost = self.evaluator.evaluate(model, random_episode)
+        if self.plot_charts:
+            self.plot(state_history, action_history, total_time)
 
     def plot(self, state_history: List[np.ndarray], action_history: List[np.ndarray], total_time: time):
         """

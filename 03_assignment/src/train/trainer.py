@@ -157,7 +157,7 @@ class Trainer:
                 best_model_cost = model_cost
                 best_model_episode = number_episode
                 best_model.save_weights(f"{self.env.weight_path()}best_model_so_far_{filename}")
-                self.experience_replay.save_buffer(f"{self.env.weight_path()}parameters.npy")  # save replay buffer: transition parameters
+                self.experience_replay.save_buffer(f"{self.env.weight_path()}buffer.npy")  # save replay buffer: transition parameters
 
         parameters['eval_time'] = total_evaluate_time
         parameters['episode_best_model'] = best_model_episode
