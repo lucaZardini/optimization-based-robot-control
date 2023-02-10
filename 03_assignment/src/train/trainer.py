@@ -41,6 +41,8 @@ class Trainer:
         :param max_iterations: max iterations
         :param episodes: the number of episodes to train the model
         :param experience_to_learn: the number of experience collected to start learning
+        :param update_critic: when to update the critic weights
+        :param evaluator: the evaluator used to evaluate the model weights
         """
         self.critic = critic
         self.target = target
@@ -101,18 +103,14 @@ class Trainer:
         for number_episode, start_episode in enumerate(start_episodes):
             parameters['cost_to_go'][number_episode] = []
             logger.info(f"Running episode [{number_episode}]")
-            if number_episode % 10 == 0 and best_model is not None:  # save the weights every 30 episodes
-                best_model.save_weights(f"weight_models/single_pendulum/best_model_so_far.h5")
-                self.experience_replay.save_buffer("weight_cost_batch_transitions.npy")  # save replay buffer: transition parameters
-
             start_episode_time = time.time()
             # ALGORITHM
             # Tell the pendulum to start in start_episode, i.e. the random initial episode
             self.env.reset(start_episode)
             # self.experience_replay.setup()
-            u = np.random.random()  # first action  TODO: se vuoi, fai in modo che azione randomica sia basata su env.
+            u = self.env.sample_random_discrete_action(0, self.env.nu)
             state = start_episode
-            transition = Transition(state, u, 0, 0) # Transition: class defined in file "experience_replay"
+            transition = Transition(state, u, 0, 0)  # Transition: class defined in file "experience_replay"
             for iteration in range(self.max_iterations):
                 if iteration % 100 == 0:
                     logger.info(f"Running iteration [{iteration}]")
@@ -121,11 +119,10 @@ class Trainer:
                 epsilon = max(epsilon, self.epsilon_min)
                 # choose next action using epsilon greedy policy
                 
-                u = self._get_action(epsilon, transition) # _get_action: function inside file "trainer"; used to choose a random action or an action that follows the model
+                u = self._get_action(epsilon, transition)
 
                 # take the action, get the cost and the next state
                 next_state, cost = self.env.step(u, state)
-
                 parameters['cost_to_go'][number_episode].append(cost)
                 # self.env.render()
                 converged = cost == 0.0
@@ -133,8 +130,6 @@ class Trainer:
                 transition = Transition(state, u, cost, next_state)
                 self.experience_replay.append(transition) # save transition object
 
-                # if self.experience_replay.size - 1 == self.experience_to_learn:
-                #     logger.info("We have enough experience to train the model")
                 # if enough experience
                 if self.experience_replay.size > self.experience_to_learn:
                     # sample random minibatch from experience replay
@@ -161,13 +156,22 @@ class Trainer:
                 best_model = self.critic.model
                 best_model_cost = model_cost
                 best_model_episode = number_episode
+                best_model.save_weights(f"weight_models/double_pendulum/forse_vai/best_model?.h5")
+                self.experience_replay.save_buffer("weight_models/double_pendulum/forse_vai/parameters?.npy")  # save replay buffer: transition parameters
+
         parameters['eval_time'] = total_evaluate_time
         parameters['episode_best_model'] = best_model_episode
         parameters['cost_best_model'] = best_model_cost
-        best_model.save_weights(f'weight_models/single_pendulum/best_model.h5')
+        best_model.save_weights(f"{filename}.h5")
         return best_model, parameters
         
     def _get_action(self, epsilon, transition) -> np.ndarray:
+        """
+        Choose the action based on epsilon greedy policy
+        :param epsilon: the epsilon value
+        :param transition: the transition
+        :return: the action
+        """
         if uniform() < epsilon:
             # logger.info("Chose random action")
             u = self.env.sample_random_discrete_action(0, 11)

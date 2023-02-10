@@ -1,6 +1,6 @@
 from enum import Enum
 
-from environment.double_pendulum.double_pendulum_template import DoublePendulum
+from environment.double_pendulum.double_pendulum import DoublePendulum
 from environment.environment import Environment
 from environment.single_pendulum.single_pendulum import SinglePendulum
 

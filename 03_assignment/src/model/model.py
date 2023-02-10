@@ -6,14 +6,14 @@ from typing import List, Tuple
 
 import tensorflow as tf
 from common.converter import Converter
-from environment.double_pendulum.double_pendulum_template import DoublePendulum
+from environment.double_pendulum.double_pendulum import DoublePendulum
 from environment.environment import Environment
 from environment.single_pendulum.single_pendulum import SinglePendulum
 from tensorflow import keras
 import numpy as np
 from tensorflow.python.framework.ops import EagerTensor, Tensor
 
-from tensorflow.python.ops.numpy_ops import np_config  # TODO: spostare dove ha senso farlo.
+from tensorflow.python.ops.numpy_ops import np_config
 from train.experience_replay import Transition
 
 np_config.enable_numpy_behavior()
@@ -47,6 +47,14 @@ class DQNManager:
 
     @staticmethod
     def load_model(dqn_type: DQNType, nx: int, nu: int, filename: str) -> DQNModel:
+        """
+        Given type of model, the state and the actions and the filename, load the model.
+        :param dqn_type: the type of the model
+        :param nx: the number of states
+        :param nu: the number of actions
+        :param filename: the filename
+        :return: the model
+        """
         if dqn_type == DQNType.DISCRETE:
             model = DQNDiscrete(nx, nu)
         else:
@@ -56,11 +64,24 @@ class DQNManager:
 
     @staticmethod
     def prepare_input(dqn_model: DQNModel, transition: Transition) -> EagerTensor: # convert the input (i.e. variable "state" from numpy type to tensorfloe type)
+        """
+        Prepare the input to pass to the neural network
+        :param dqn_model: the model
+        :param transition: the transition to convert
+        :return: the input to the model
+        """
         if isinstance(dqn_model, DQNDiscrete):
             return Converter.np2tf(transition.get_state_vector())
 
     @staticmethod
     def get_action_from_output_model(dqn_model: DQNModel, model_output, env: Environment) -> np.ndarray: # pass the index where there is the best action
+        """
+        Given model output, get the associated action
+        :param dqn_model: the model
+        :param model_output: the output of the model
+        :param env: the environment
+        :return: the best action
+        """
         if isinstance(dqn_model, DQNDiscrete):
             if isinstance(env, SinglePendulum):
                 return Converter.tf2np(tf.argmin(model_output, axis=1, name=None).astype(np.float32))
@@ -69,6 +90,13 @@ class DQNManager:
 
     @staticmethod
     def prepare_minibatch(dqn_model: DQNModel, minibatch: List[Transition], env: Environment) -> Tuple[Tensor, Tensor, Tensor, Tensor]: # convert the minibatch from numpy type to tensorflow type
+        """
+        Prepare the minibatches used to update the model
+        :param dqn_model: the model
+        :param minibatch: the minibatch
+        :param env: the environment
+        :return: the minibatches
+        """
         if isinstance(dqn_model, DQNDiscrete):
             np_minibatch = np.array([transition.get_state_vector() for transition in minibatch])
             np_next_minibatch = np.array([transition.get_next_state_vector() for transition in minibatch])

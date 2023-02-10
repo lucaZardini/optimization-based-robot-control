@@ -12,15 +12,15 @@ class DefaultValues:
     DISCOUNT = 0.99
     LEARNING_RATE = 1e-3
     EXPERIENCE_REPLAY = 10000
-    BATCH_SIZE = 32
+    BATCH_SIZE = 128
     UPDATE_TARGET_PARAMS = 1000
     EPSILON_START = 1.00
     UPDATE_CRITIC_WEIGHTS = 10
-    EPSILON_DECAY = 0.9995  # TODO: update epsilon decay and max iterations together because they are connected.
+    EPSILON_DECAY = 0.9995
     EPSILON_MIN = 0.002
-    MAX_ITERATIONS = 500  # TODO
-    MAX_ITERATIONS_EVAL = 2000000
-    EPISODES = 300  # TODO
+    MAX_ITERATIONS = 500
+    MAX_ITERATIONS_EVAL = 3000
+    EPISODES = 5000
 
 
 if __name__ == "__main__":

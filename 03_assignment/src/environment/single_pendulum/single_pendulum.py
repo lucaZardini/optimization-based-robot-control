@@ -16,23 +16,16 @@ class SinglePendulum(Environment):
     Cost is -1 if the goal state has been reached, zero otherwise.
     '''
 
-    def __init__(self, nq=51, nv=21, nu=11, vMax=5, uMax=2, dt=0.2, ndt=1, noise_stddev=0):
+    def __init__(self, nu=11, uMax=2, dt=0.05, ndt=1, noise_stddev=0):
         """
-        :param nq: the number of points joint angles
-        :param nv: the number of points joint velocities
         :param nu: the number of points joint torques
         """
         self.pendulum = Pendulum(1, noise_stddev)
         self.pendulum.DT = dt
         self.pendulum.NDT = ndt
-        # self.nq = nq  # Number of discretization steps for joint angle
-        # self.nv = nv  # Number of discretization steps for joint velocity
-        # self.vMax = vMax  # Max velocity (v in [-vmax,vmax])
         self._nu = nu  # Number of discretization steps for joint torque
         self.uMax = uMax  # Max torque (u in [-umax,umax])
         self.dt = dt  # time step
-        # self.DQ = 2 * pi / nq  # discretization resolution for joint angle
-        # self.DV = 2 * vMax / nv  # discretization resolution for joint velocity
         self.DU = 2 * uMax / nu  # discretization resolution for joint torque
 
     @property
@@ -78,51 +71,13 @@ class SinglePendulum(Environment):
         self.xc, _ = self.pendulum.dynamics(x, u)
         return self.xc
 
-    # def plot_V_table(self, V):
-    #     ''' Plot the given Value table V '''
-    #     import matplotlib.pyplot as plt
-    #     Q, DQ = np.meshgrid([self.d2cq(i) for i in range(self.nq)],
-    #                         [self.d2cv(i) for i in range(self.nv)])
-    #     plt.pcolormesh(Q, DQ, V.reshape((self.nv, self.nq)), cmap=plt.cm.get_cmap('Blues'))
-    #     plt.colorbar()
-    #     plt.title('V table')
-    #     plt.xlabel("q")
-    #     plt.ylabel("dq")
-    #     plt.show()
-    #
-    # def plot_policy(self, pi):
-    #     ''' Plot the given policy table pi '''
-    #     import matplotlib.pyplot as plt
-    #     Q, DQ = np.meshgrid([self.d2cq(i) for i in range(self.nq)],
-    #                         [self.d2cv(i) for i in range(self.nv)])
-    #     plt.pcolormesh(Q, DQ, pi.reshape((self.nv, self.nq)), cmap=plt.cm.get_cmap('RdBu'))
-    #     plt.colorbar()
-    #     plt.title('Policy')
-    #     plt.xlabel("q")
-    #     plt.ylabel("dq")
-    #     plt.show()
-    #
-    # def plot_Q_table(self, Q):
-    #     ''' Plot the given Q table '''
-    #     import matplotlib.pyplot as plt
-    #     X, U = np.meshgrid(range(Q.shape[0]), range(Q.shape[1]))
-    #     plt.pcolormesh(X, U, Q.T, cmap=plt.cm.get_cmap('Blues'))
-    #     plt.colorbar()
-    #     plt.title('Q table')
-    #     plt.xlabel("x")
-    #     plt.ylabel("u")
-    #     plt.show()
-
     def sample_random_start_episodes(self, episode_length: int) -> list:
         start_episodes: list = []
         for i in range(episode_length):
-            if i % 10 != 0:
-                start_episodes.append(np.array([pi, 0]))
-            else:
-                joint_angle = random.uniform(low=-pi, high=pi, size=1)
-                joint_velocity = random.uniform(low=-self.pendulum.vmax, high=self.pendulum.vmax, size=1)
-                state = np.array([joint_angle[0], joint_velocity[0]])
-                start_episodes.append(state)
+            joint_angle = random.uniform(low=-pi, high=pi, size=1)
+            joint_velocity = random.uniform(low=-self.pendulum.vmax, high=self.pendulum.vmax, size=1)
+            state = np.array([joint_angle[0], joint_velocity[0]])
+            start_episodes.append(state)
         return start_episodes
 
     def sample_random_discrete_action(self, start: int, end: int) -> np.ndarray:

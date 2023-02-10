@@ -42,6 +42,7 @@ class Manager:
         :param max_iterations: max iterations
         :param episodes: the number of episodes during training
         :param experience_to_learn: the number of experience collected to start learning
+        :param max_iterations_eval: the number of eval iterations
         """
         self.environment = EnvironmentManager.get_environment(env_type)
         self.critic = DQNManager.get_model(critic_type, self.environment.nx, self.environment.nu)
@@ -51,7 +52,8 @@ class Manager:
         self.evaluator = Evaluator(self.environment, max_iterations_eval)
         self.trainer = Trainer(self.critic, self.target, self.optimizer, self.environment, discount, batch_size,
                                update_target_params, epsilon_start, epsilon_decay, epsilon_min, buffer_size,
-                               max_iterations, episodes, experience_to_learn, update_critic, self.evaluator)
+                               max_iterations, episodes, experience_to_learn, update_critic,
+                               Evaluator(self.environment, max_iterations))
         self.plot_charts = plot_charts
         self.save_params = save_params
 
@@ -62,7 +64,7 @@ class Manager:
         logger.info(f"Starting to train the model [{self.critic.type.value}] and store the weights in [{filename}]")
         best_model, parameters = self.trainer.train(filename)
         if self.save_params:
-            np.save("weight_models/single_pendulum/parameters.npy", parameters, allow_pickle=True)
+            np.save("weight_models/single_pendulum/parameters_u_bll.npy", parameters, allow_pickle=True)
         training_time = sum([time_episode for time_episode in parameters['time']])
         print(f"Total training time: {str(datetime.timedelta(seconds=training_time))}")
         cost_to_go = parameters['cost_to_go']
@@ -74,6 +76,13 @@ class Manager:
 
     @staticmethod
     def plot_cost_and_loss(cost_to_go: dict, loss: List[np.ndarray], discount_factor: int, episodes: int):
+        """
+        Given the cost to go and the list of loss, plot the relative charts.
+        :param cost_to_go: A dict with as key the number of episode and as value the list of the costs.
+        :param loss: the list of loss of the training step
+        :param discount_factor: the discount factor used to compute the cost-to-go
+        :param episodes: the number of episodes
+        """
         plt.figure()
         average_costs = []
         for episode in range(episodes):
@@ -96,50 +105,80 @@ class Manager:
         plt.show()
 
     def load(self, model_type: DQNType, filename: str):
+        """
+        Load the model and evaluate it.
+        :param model_type: type of model
+        :param filename: the filename
+        """
         model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
-        state_history, action_history, total_time, cost = self.evaluator.evaluate(model, self.environment.sample_random_start_episodes(1)[0])
-        if self.plot_charts:
-            self.plot(state_history, action_history, total_time)
+        self.evaluator.evaluate(model, np.array([math.pi, 0, 0, 0]))
+        random_episodes = self.environment.sample_random_start_episodes(10)
+        for random_episode in random_episodes:
+            state_history, action_history, total_time, cost = self.evaluator.evaluate(model, random_episode)
+        # if self.plot_charts:
+        #     self.plot(state_history, action_history, total_time)
 
     def plot(self, state_history: List[np.ndarray], action_history: List[np.ndarray], total_time: time):
+        """
+        Plot stats related to the evaluations
+        :param state_history: list of states
+        :param action_history: list of actions
+        :param total_time: time of evaluation
+        """
         if isinstance(self.environment, SinglePendulum):
             self.plot_single_pendulum_charts(state_history, action_history, total_time)
         else:
             self.plot_double_pendulum_charts(state_history, action_history, total_time)
 
     def plot_single_pendulum_charts(self, state_history: List[np.ndarray], action_history: List[np.ndarray], total_time: time):
+        """
+        Plot charts for the single pendulum
+        :param state_history: list of states
+        :param action_history: list of actions
+        :param total_time: time of evaluation
+        """
         plt.figure()
         joint_angle = [x[0] for x in state_history]
         plt.plot(np.arange(len(state_history)), joint_angle, "b")
-        plt.gca().set_xlabel('Action')
+        plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('[rad]')
         plt.legend(["Joint angle"], loc='upper right')
+        plt.savefig("joint-angle.png")
 
         plt.figure()
         joint_velocity = [x[1] for x in state_history]
         plt.plot(np.arange(len(state_history)), joint_velocity, "b")
-        plt.gca().set_xlabel('Action')
+        plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('[rad/s]')
         plt.legend(["Joint velocity"], loc='upper right')
+        plt.savefig("joint-velocity.png")
 
         plt.figure()
         plt.plot(np.arange(len(action_history)), action_history, "b")
-        plt.gca().set_xlabel('Action')
+        plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('Action value')
         plt.legend(["Discrete action value"], loc='upper right')
+        plt.savefig("discrete-actions.png")
 
         action_continue_history = [self.environment.d2cu(u) for u in action_history]
         plt.figure()
         plt.plot(np.arange(len(action_continue_history)), action_continue_history, "b")
-        plt.gca().set_xlabel('Action')
+        plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('[Nm]')
         plt.legend(["Joint torque"], loc='upper right')
+        plt.savefig("joint-torque.png")
 
         print(f"Total simulation time: {str(datetime.timedelta(seconds=total_time))}")
 
         plt.show()
 
     def plot_double_pendulum_charts(self, state_history: List[np.ndarray], action_history: List[np.ndarray], total_time: time):
+        """
+        Plot charts for the double pendulum
+        :param state_history: list of states
+        :param action_history: list of actions
+        :param total_time: time of evaluation
+        """
         plt.figure()
         first_joint_angle = [x[0] for x in state_history]
         plt.plot(np.arange(len(state_history)), first_joint_angle, "b")
