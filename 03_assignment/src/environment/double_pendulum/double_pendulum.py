@@ -41,8 +41,7 @@ class DoublePendulum(Environment):
         v_mean = v + self.dt * ddq
         self.dx[:nv] = v_mean
         state = x + self.dt * self.dx
-        # cost = 10 * sumsq(state[1] + state[0]) + 5 * sumsq(state[1] + sumsq(state[0]))
-        cost = sumsq(state[1] + state[0]) + sumsq(state[:2])
+        cost = 10 * sumsq(state[1] + state[0]) + 5 * sumsq(state[1]) + sumsq(state[0])
         state[:nq] = modulePi(state[:nq])
         state[nq:] = np.clip(state[nq:], -self.vmax, self.vmax)
         self.state = np.copy(state)
