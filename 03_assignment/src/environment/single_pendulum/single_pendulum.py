@@ -12,12 +12,12 @@ import matplotlib.colors as mlp_colors
 
 
 class SinglePendulum(Environment):
-    '''
+    """
     Discrete Pendulum environment. Joint angle, velocity and torque are discretized
     with the specified steps. Joint velocity and torque are saturated.
     Gaussian noise can be added in the dynamics.
     Cost is -1 if the goal state has been reached, zero otherwise.
-    '''
+    """
 
     def __init__(self, nu=11, uMax=2, dt=0.05, ndt=1, noise_stddev=0):
         """
@@ -42,10 +42,6 @@ class SinglePendulum(Environment):
     @property
     def setup_state(self):
         return np.array([pi, 0.])
-
-    def c2du(self, u):
-        u = np.clip(u, -self.uMax + 1e-3, self.uMax - 1e-3)
-        return int(np.floor((u + self.uMax) / self.DU))
 
     def d2cu(self, iu):
         iu = np.clip(iu, 0, self._nu - 1) - (self._nu - 1) / 2
