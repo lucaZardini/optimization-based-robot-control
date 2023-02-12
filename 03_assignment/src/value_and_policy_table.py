@@ -51,7 +51,7 @@ class SinglePendulumValuePolicyTables:
 
 
 if __name__ == "__main__":
-    arg_parser = argparse.ArgumentParser(description="Plot training info")
+    arg_parser = argparse.ArgumentParser(description="Plot value and policy table for single pendulum environment")
     arg_parser.add_argument("--weight-path", type=str, required=True, help="The path to the parameters file")
     args = arg_parser.parse_args()
 
