@@ -1,11 +1,14 @@
 from math import pi
-from typing import Optional, List
+from typing import Optional, List, Tuple
+
 
 from environment.environment import Environment
 from environment.single_pendulum.pendulum_template import Pendulum
 import numpy as np
 from numpy import random
 import time
+import matplotlib.pyplot as plt
+import matplotlib.colors as mlp_colors
 
 
 class SinglePendulum(Environment):
@@ -98,3 +101,56 @@ class SinglePendulum(Environment):
     @staticmethod
     def weight_path() -> str:
         return "weight_models/single_pendulum/"
+
+    # Functions used to create value and policy table. They are not used in other parts of code.
+    def disc_state_from_2d_to_1d(self, disc_state: Tuple[int, int], discrete_number: int) -> int:
+        return disc_state[0] + disc_state[1] * discrete_number
+
+    def disc_state_2d_to_cont_state(self, disc_state: Tuple[int, int], discrete_number: int) -> np.ndarray:
+        return np.array([self.d2c_angle(disc_state[0], discrete_number), self.d2c_velocity(disc_state[1], discrete_number)])
+
+    def d2c_angle(self, angle_idx: int, discrete_number: int) -> float:
+        discr_resolution = 2 * np.pi / discrete_number
+        angle_idx = np.clip(angle_idx, 0, discrete_number - 1)
+        return angle_idx * discr_resolution - np.pi + 0.5 * discr_resolution
+
+    def d2c_velocity(self, vel_idx: int, discrete_number: int) -> float:
+        discr_resolution = 2 * 8 / discrete_number
+        vel_idx = np.clip(vel_idx, 0, discrete_number - 1) - (discrete_number - 1) / 2
+        return vel_idx * discr_resolution
+
+    def plot_v_table(self, v_table: np.ndarray, discrete_number: int):
+        plt.figure()
+        angles, vels = np.meshgrid(
+            [self.d2c_angle(i, discrete_number) for i in range(discrete_number)],
+            [self.d2c_velocity(i, discrete_number) for i in range(discrete_number)]
+        )
+        plt.pcolormesh(
+            angles, vels, v_table.reshape((discrete_number, discrete_number)), cmap=plt.cm.get_cmap("Blues")
+        )
+        plt.colorbar(label="Cost to go (value)")
+        plt.title("Value table")
+        plt.xlabel("Joint angle [rad]")
+        plt.ylabel("Joint velocity [rad/s]")
+        plt.savefig("value_table.png")
+
+    def plot_pi_table(self, pi_table: np.ndarray, discrete_number: int):
+        plt.figure()
+        angles, vels = np.meshgrid(
+            [self.d2c_angle(i, discrete_number) for i in range(discrete_number)],
+            [self.d2c_velocity(i, discrete_number) for i in range(discrete_number)]
+        )
+        # Make a discrete color map
+        cmap = plt.cm.get_cmap("RdBu")
+        bounds = [self.d2cu(dis_torque) for dis_torque in range(11)]
+        norm = mlp_colors.BoundaryNorm(bounds, cmap.N)
+        plt.pcolormesh(
+            angles, vels, pi_table.reshape((discrete_number, discrete_number)),
+            cmap=cmap, norm=norm
+        )
+        plt.colorbar(label="Torque [Nm]")
+        plt.title("Policy table")
+        plt.xlabel("Joint angle [rad]")
+        plt.ylabel("Joint velocity [rad/s]")
+        plt.savefig("policy_table.png")
+        plt.show()
