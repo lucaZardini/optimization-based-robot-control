@@ -143,7 +143,7 @@ class Manager:
         plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('[rad]')
         plt.legend(["Joint angle"], loc='upper right')
-        plt.savefig("joint-angle.png")
+        # plt.savefig("joint-angle.png")
 
         plt.figure()
         joint_velocity = [x[1] for x in state_history]
@@ -151,14 +151,14 @@ class Manager:
         plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('[rad/s]')
         plt.legend(["Joint velocity"], loc='upper right')
-        plt.savefig("joint-velocity.png")
+        # plt.savefig("joint-velocity.png")
 
         plt.figure()
         plt.plot(np.arange(len(action_history)), action_history, "b")
         plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('Action value')
         plt.legend(["Discrete action value"], loc='upper right')
-        plt.savefig("discrete-actions.png")
+        # plt.savefig("discrete-actions.png")
 
         action_continue_history = [self.environment.d2cu(u) for u in action_history]
         plt.figure()
@@ -166,7 +166,7 @@ class Manager:
         plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('[Nm]')
         plt.legend(["Joint torque"], loc='upper right')
-        plt.savefig("joint-torque.png")
+        # plt.savefig("joint-torque.png")
 
         print(f"Total simulation time: {str(datetime.timedelta(seconds=total_time))}")
 
