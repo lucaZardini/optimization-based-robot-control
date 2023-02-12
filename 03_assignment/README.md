@@ -100,3 +100,9 @@ To evaluate the _double_pendulum_ model provided, run the following:
 ```bash
 python main.py --weight-path weight_models/double_pendulum/model_double_pendulum.h5 --env double_pendulum --eval
 ```
+
+
+If you want to plot the training info, run the following script located in `src` folder:
+```bash
+python plot_training_data.py --weight-path path_to_parameters.npy
+```
