@@ -22,7 +22,8 @@ class Manager:
                  target_type: DQNType, env_type: EnvironmentType, batch_size: int, update_target_params: int,
                  epsilon_start: float, epsilon_decay: float, epsilon_min: float, buffer_size: int,
                  max_iterations: int, episodes: int, experience_to_learn: int, update_critic: int,
-                 max_iterations_eval: int, plot_charts: bool = True, save_params: bool = True):
+                 max_iterations_eval: int, number_of_simulations: int, plot_charts: bool = True,
+                 save_params: bool = True):
         """
         This class is the entry point of the project. It dispatches every possible functionality implemented.
 
@@ -53,6 +54,7 @@ class Manager:
                                update_target_params, epsilon_start, epsilon_decay, epsilon_min, buffer_size,
                                max_iterations, episodes, experience_to_learn, update_critic,
                                Evaluator(self.environment, max_iterations))
+        self.number_of_simulations = number_of_simulations
         self.plot_charts = plot_charts
         self.save_params = save_params
 
@@ -95,24 +97,34 @@ class Manager:
         plt.gca().set_xlabel('Episodes')
         plt.gca().set_ylabel('Cost-to-go')
         plt.legend(["Cost to go"], loc='upper right')
+        plt.savefig("cost_to_go.png")
 
         plt.figure()
         plt.plot(np.arange(len(loss)), loss, "b")
-        plt.gca().set_xlabel('Action')
+        plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('Loss')
         plt.legend(["Training loss"], loc='upper right')
+        plt.savefig("training_loss.png")
         plt.show()
 
-    def load(self, model_type: DQNType, filename: str):
+    def simulate(self, model_type: DQNType, filename: str):
+        """
+        Simulate the model with number_of_simulations random starts
+        :param model_type: the model type
+        :param filename: the path to the file
+        """
+        model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
+        random_episodes = self.environment.sample_random_start_episodes(self.number_of_simulations)
+        for random_episode in random_episodes:
+            _, _, _, _ = self.evaluator.evaluate(model, random_episode)
+
+    def eval(self, model_type: DQNType, filename: str):
         """
         Load the model and evaluate it.
         :param model_type: type of model
         :param filename: the filename
         """
         model = DQNManager.load_model(model_type, self.environment.nx, self.environment.nu, filename)
-        random_episodes = self.environment.sample_random_start_episodes(10)
-        # for random_episode in random_episodes:
-        #     state_history, action_history, total_time, cost = self.evaluator.evaluate(model, random_episode)
         random_episode = self.environment.sample_random_start_episodes(1)[0]
         state_history, action_history, total_time, cost = self.evaluator.evaluate(model, random_episode)
         if self.plot_charts:

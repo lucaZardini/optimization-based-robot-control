@@ -21,6 +21,7 @@ class DefaultValues:
     MAX_ITERATIONS = 500
     MAX_ITERATIONS_EVAL = 500
     EPISODES = 500
+    NUMBER_OF_SIMULATIONS = 10
 
 
 if __name__ == "__main__":
@@ -28,6 +29,8 @@ if __name__ == "__main__":
     arg_parser.add_argument("--model", type=str, required=False, default=DefaultValues.DQN, help="The model to train or to lead")
     arg_parser.add_argument("--train", default=False, action="store_true", required=False, help="Create a network and train it")
     arg_parser.add_argument("--eval", default=False, action="store_true", required=False, help="Evaluate a pretrained model, the path is required")
+    arg_parser.add_argument("--simulate", default=False, action="store_true", required=False, help="Simulate trained model over a specific number of random episodes")
+    arg_parser.add_argument("--number-of-simulations", type=int, required=False, default=DefaultValues.NUMBER_OF_SIMULATIONS, help="Number of random start simulations")
     arg_parser.add_argument("--weight-path", type=str, required=True, help="The path to the weights of the pretrained model, or where to store the model")
     arg_parser.add_argument("--optimizer", type=str, required=False, help="Optimizer used to train the model, default is adam", default="adam")
     arg_parser.add_argument("--env", type=str, required=False, default=DefaultValues.ENV, help="The environment to train/load the model")
@@ -52,19 +55,21 @@ if __name__ == "__main__":
 
     env_type = EnvironmentType(args.env)
 
-    if not args.train and not args.eval:
+    if not args.train and not args.eval and not args.simulate:
         raise ValueError("You need to specify if you want to train a model or evaluate a pretrained one")
 
-    if args.eval:
-        if args.weight_path is None:
-            raise ValueError("You need to specify the path to the pretrained weights")
+    if args.weight_path is None:
+        raise ValueError("You need to specify the path to the pretrained weights")
 
     manager = Manager(args.discount_factor, args.learning_rate, optimizer_type, model_type, model_type, env_type,
                       args.batch_size, args.update_target_param, args.epsilon_start, args.epsilon_decay,
                       args.epsilon_min, args.experience_replay_size, args.max_iterations, args.episodes,
-                      args.experience_to_learn, args.update_critic_param, args.max_iterations_eval)
+                      args.experience_to_learn, args.update_critic_param, args.max_iterations_eval,
+                      args.number_of_simulations)
 
     if args.train:
-        manager.train(args.weight_path) # to train
+        manager.train(args.weight_path)  # to train
+    elif args.eval:
+        manager.eval(model_type, args.weight_path)  # to evaluate
     else:
-        manager.load(model_type, args.weight_path) # to evaluate
+        manager.simulate(model_type, args.weight_path)

@@ -4,10 +4,11 @@
 
 This project aims at training a deep q network to stabilize a pendulum (_single_ or _double_) at the high top position (when angle and velocity equal to 0).
 
-Two functionalities are available:
+Three functionalities are available:
 
 * train
-* load
+* eval
+* simulate
 
 ### Train the model
 
@@ -15,9 +16,13 @@ This project trains an empty neural network to solve the problem on your local m
 It follows the deep-Q-learning algorithm presented in 2015 and starts several times from random position to better train the parameters.
 After the training, it is possible to save the weights in a file.
 
-### Load the model
+### Evaluate the model
 
-It is possible to load the trained weights in a model and simulate the environment to see the behaviour of the agent in the environment.
+It is possible to load the trained weights in a model and evaluate it to see the behaviour of the agent in the environment. At the end, plots are visualized.
+
+### Simulate the model
+
+It is possible to simulate the model with n random starts to see its behaviour.
 
 ## How to use it
 
@@ -46,6 +51,8 @@ variables that can be adjusted:
 | `-- model`                 | The selected model                                                                              | `False`  | state           |
 | `--train`                  | Boolean value that run the project in training mode                                             | `False`  |                 |
 | `--eval`                   | Boolean value that run the project in evaluating mode                                           | `False`  |                 |
+| `--simulate`               | Boolean value that run the project in simulating mode                                           | `False`  |                 |
+| `--number_of_simulations`  | Number of random start simulations. It works only with boolean `simulate`                       | `False`  | 10              |
 | `--weight-path`            | String value where to save/load the weights                                                     | `True`   | -               |
  | `--optimizer`              | The optimizer used to train the model                                                           | `False`  | adam            |
 | `--env`                    | The environment to interact with                                                                | `False`  | single_pendulum |
@@ -101,6 +108,12 @@ To evaluate the _double_pendulum_ model provided, run the following:
 python main.py --weight-path weight_models/double_pendulum/model_double_pendulum.h5 --env double_pendulum --eval
 ```
 
+To simulate the model, the process is equal to the evaluation. The difference relies on the _--simulate_ argument and the optional
+_number-of-simulations_ parameter.
+An example, with the single pendulum is the following:
+```bash
+python main.py --weight-path weight_models/single_pendulum/model_single_pendulum.h5 --simulate --number-of-simulations 8
+```
 
 If you want to plot the training info, run the following script located in `src` folder:
 ```bash
