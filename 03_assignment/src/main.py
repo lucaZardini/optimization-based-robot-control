@@ -12,15 +12,15 @@ class DefaultValues:
     DISCOUNT = 0.99
     LEARNING_RATE = 1e-3
     EXPERIENCE_REPLAY = 10000
-    BATCH_SIZE = 128
+    BATCH_SIZE = 32
     UPDATE_TARGET_PARAMS = 1000
     EPSILON_START = 1.00
     UPDATE_CRITIC_WEIGHTS = 10
     EPSILON_DECAY = 0.9995
     EPSILON_MIN = 0.002
     MAX_ITERATIONS = 500
-    MAX_ITERATIONS_EVAL = 3000
-    EPISODES = 5000
+    MAX_ITERATIONS_EVAL = 500
+    EPISODES = 500
 
 
 if __name__ == "__main__":
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     arg_parser.add_argument("--weight-path", type=str, required=True, help="The path to the weights of the pretrained model, or where to store the model")
     arg_parser.add_argument("--optimizer", type=str, required=False, help="Optimizer used to train the model, default is adam", default="adam")
     arg_parser.add_argument("--env", type=str, required=False, default=DefaultValues.ENV, help="The environment to train/load the model")
-    arg_parser.add_argument("--update-critic", type=float, required=False, default=DefaultValues.UPDATE_CRITIC_WEIGHTS, help="At which steps updating the critic weights")
+    arg_parser.add_argument("--update-critic-param", type=float, required=False, default=DefaultValues.UPDATE_CRITIC_WEIGHTS, help="At which steps updating the critic weights")
     arg_parser.add_argument("--discount-factor", type=float, required=False, default=DefaultValues.DISCOUNT, help="Discount factor")
     arg_parser.add_argument("--learning-rate", type=float, required=False, default=DefaultValues.LEARNING_RATE, help="Learning rate")
     arg_parser.add_argument("--experience-replay-size", type=float, required=False, default=DefaultValues.EXPERIENCE_REPLAY, help="Experience replay size")
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     manager = Manager(args.discount_factor, args.learning_rate, optimizer_type, model_type, model_type, env_type,
                       args.batch_size, args.update_target_param, args.epsilon_start, args.epsilon_decay,
                       args.epsilon_min, args.experience_replay_size, args.max_iterations, args.episodes,
-                      args.experience_to_learn, args.update_critic, args.max_iterations_eval)
+                      args.experience_to_learn, args.update_critic_param, args.max_iterations_eval)
 
     if args.train:
         manager.train(args.weight_path) # to train
