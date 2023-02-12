@@ -44,24 +44,59 @@ variables that can be adjusted:
 | Argument                   | Description                                                                                     | Required | Default         |
 |----------------------------|-------------------------------------------------------------------------------------------------|----------|-----------------|
 | `-- model`                 | The selected model                                                                              | `False`  | state           |
-| `--train`                  | Boolean value that describes if train or load the model                                         | `False`  | `True`          |
+| `--train`                  | Boolean value that run the project in training mode                                             | `False`  |                 |
+| `--eval`                   | Boolean value that run the project in evaluating mode                                           | `False`  |                 |
 | `--weight-path`            | String value where to save/load the weights                                                     | `True`   | -               |
  | `--optimizer`              | The optimizer used to train the model                                                           | `False`  | adam            |
 | `--env`                    | The environment to interact with                                                                | `False`  | single_pendulum |
- | `--discount-factor`        | The discount factor of the reinforcement algorithm                                              | `False`  |                 |
-| `--learning-rate`          | The learning rate                                                                               | `False`  |                 |
-| `--experience-replay-size` | The size of the experience replay                                                               | `False`  ||
-| `--batch-size`             | The batch size                                                                                  | `False`  ||
-| `--update-target-param`    | Every which steps update the parameters of the target model                                     | `False`  ||
-| `--epsilon-start`          | The initial value of the epsilon parameter (describes the probability to select a random choice | `False`  ||
-| `--epsilon-decay`          | The epsilon decay                                                                               | `False`  |                 |
-| `--epsilon-min`            | The minimum value of epsilon                                                                    | `False`  ||
-| `--max-iterations`         | The maximum number of iterations per episode                                                    | `False`  |                 |
-| `--episodes`               | The number of episodes                                                                          | `False`  ||
-| `--experience-to-learn`    | How many steps are required to start to train the weights of the model                          | `False`  ||
+ | `--discount-factor`        | The discount factor of the reinforcement algorithm                                              | `False`  | 0.99            |
+| `--learning-rate`          | The learning rate                                                                               | `False`  | 1e-3            |
+| `--experience-replay-size` | The size of the experience replay                                                               | `False`  | 10000           |
+| `--batch-size`             | The batch size                                                                                  | `False`  | 32              |
+| `--update-target-param`    | Every which steps update the parameters of the target model                                     | `False`  | 1000            |
+| `--update-critic-param`    | Every which steps update the parameters of the critic model                                     | `False`  | 10              |
+| `--epsilon-start`          | The initial value of the epsilon parameter (describes the probability to select a random choice | `False`  | 1               |
+| `--epsilon-decay`          | The epsilon decay                                                                               | `False`  | 0.9995          |
+| `--epsilon-min`            | The minimum value of epsilon                                                                    | `False`  | 0.002           |
+| `--max-iterations`         | The maximum number of iterations per episode                                                    | `False`  | 500             |
+| `--max-iterations-eval`    | The maximum number of iterations to evaluate the model                                          | `False`  | 500             |
+| `--episodes`               | The number of episodes                                                                          | `False`  | 500             |
+| `--experience-to-learn`    | How many steps are required to start to train the weights of the model                          | `False`  | 32              |
 
 The above parameters can be selected calling the _main.py_ file and adding the desired values
 ```bash
 python main.py --arg_name arg_value
 ```
 
+It is required to specify if you want to train a new model or evaluate an existing one.
+
+To train a neural network, run the following command line:
+```bash
+python main.py --weight-path your_name.h5 --train
+```
+
+By default, the best model so far found by the algorithm is saved into the `weight_models` folder.
+Inside this folder, depending on the environment selected, the weights are stored into the `single_pendulum` or `double_pendulum` folder.
+When the algorithm terminates, it saves the best model in that folder with the name specified.
+Additionally, two other files are stored there:
+- A file named _buffer.npy_ which contains the experience buffer saved (if you want to train again the model, also the buffer replay is required). 
+At the moment, the possibility to train a model starting from an existing one and a buffer is not implemented.
+- A file named _parameters.npy_ that contains all the info associated with the training, i.e., the training time, the evaluation time, the cost and the loss per each episode.
+
+Instead, to evaluate an existing model, run the following command:
+```bash
+python main.py --weight-path your_name.h5 --eval
+```
+
+In this case, there is not a default to the weight path, so you need to specify the relative path from `src` folder.
+
+Two models are already present in the `weight_models` folder.
+To evaluate the _single_pendulum_ model provided, run the following:
+```bash
+python main.py --weight-path weight_models/single_pendulum/model_single_pendulum.h5 --eval
+```
+
+To evaluate the _double_pendulum_ model provided, run the following:
+```bash
+python main.py --weight-path weight_models/double_pendulum/model_double_pendulum.h5 --env double_pendulum --eval
+```
