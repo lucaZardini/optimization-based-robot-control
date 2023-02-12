@@ -1,4 +1,3 @@
-import math
 from typing import List
 import datetime
 import time
@@ -183,44 +182,38 @@ class Manager:
         plt.figure()
         first_joint_angle = [x[0] for x in state_history]
         plt.plot(np.arange(len(state_history)), first_joint_angle, "b")
-        plt.gca().set_xlabel('Action')
-        plt.gca().set_ylabel('[rad]')
-        plt.legend(["First joint angle"], loc='upper right')
-
-        plt.figure()
         second_joint_angle = [x[1] for x in state_history]
-        plt.plot(np.arange(len(state_history)), second_joint_angle, "b")
-        plt.gca().set_xlabel('Action')
+        plt.plot(np.arange(len(state_history)), second_joint_angle, "r")
+        plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('[rad]')
-        plt.legend(["Second joint angle"], loc='upper right')
+        plt.legend(["First joint angle", "Second joint angle"], loc='upper right')
+        # plt.savefig("dp_joint_angles.png")
 
         plt.figure()
         first_joint_velocity = [x[2] for x in state_history]
         plt.plot(np.arange(len(state_history)), first_joint_velocity, "b")
-        plt.gca().set_xlabel('Action')
-        plt.gca().set_ylabel('[rad/s]')
-        plt.legend(["First joint velocity"], loc='upper right')
-
-        plt.figure()
         second_joint_velocity = [x[3] for x in state_history]
-        plt.plot(np.arange(len(state_history)), second_joint_velocity, "b")
-        plt.gca().set_xlabel('Action')
+        plt.plot(np.arange(len(state_history)), second_joint_velocity, "r")
+        plt.gca().set_xlabel('Interations')
         plt.gca().set_ylabel('[rad/s]')
-        plt.legend(["Second joint velocity"], loc='upper right')
+        plt.legend(["First joint velocity", "Second joint velocity"], loc='upper right')
+        # plt.savefig("dp_joint_velocities.png")
 
         plt.figure()
         first_joint_action = [u[0] for u in action_history]
         plt.plot(np.arange(len(action_history)), first_joint_action, "b")
-        plt.gca().set_xlabel('Action')
+        plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('Action value')
         plt.legend(["Discrete action value"], loc='upper right')
+        # plt.savefig("dp_action_discrete.png")
 
         action_continue_history = [self.environment.d2cu(u) for u in first_joint_action]
         plt.figure()
         plt.plot(np.arange(len(action_continue_history)), action_continue_history, "b")
-        plt.gca().set_xlabel('Action')
+        plt.gca().set_xlabel('Iterations')
         plt.gca().set_ylabel('[Nm]')
         plt.legend(["Joint torque"], loc='upper right')
+        # plt.savefig("dp_torque.png")
 
         print(f"Total simulation time: {str(datetime.timedelta(seconds=total_time))}")
 
