@@ -6,11 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
-# txt files
-*.txt
-
 # csv files
 *.csv
+*.png
+*.npy
+*.h5
 
 # Distribution / packaging
 .Python
